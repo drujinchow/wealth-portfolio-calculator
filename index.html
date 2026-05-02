@@ -1,0 +1,3467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>FIN — Wealth Portfolio Calculator</title>
+<style>
+  :root {
+    color-scheme: light;
+    --primary: #1B4332;
+    --primary-2: #2D6A4F;
+    --primary-3: #40916C;
+    --primary-light: #D8F3DC;
+    --accent: #B8860B;
+    --accent-light: #F5E6B8;
+    --bg: #FAFAF7;
+    --surface: #FFFFFF;
+    --surface-2: #F5F5F0;
+    --text: #1A1A1A;
+    --text-muted: #6B7280;
+    --text-subtle: #9CA3AF;
+    --border: #E5E7EB;
+    --border-strong: #D1D5DB;
+    --shadow-sm: 0 1px 2px rgba(27, 67, 50, 0.04), 0 1px 3px rgba(27, 67, 50, 0.06);
+    --shadow-md: 0 4px 6px rgba(27, 67, 50, 0.04), 0 2px 4px rgba(27, 67, 50, 0.06);
+    --shadow-lg: 0 10px 15px rgba(27, 67, 50, 0.06), 0 4px 6px rgba(27, 67, 50, 0.04);
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 14px;
+    --radius-xl: 20px;
+    --font-display: Georgia, 'Iowan Old Style', 'Times New Roman', serif;
+    --font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, 'Helvetica Neue', Arial, sans-serif;
+    --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, 'Courier New', monospace;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: var(--font-body);
+    color: var(--text);
+    background: var(--bg);
+    line-height: 1.5;
+    font-size: 15px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* ---------- Header ---------- */
+  .topbar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .brand-mark {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-2) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 18px;
+    letter-spacing: -0.5px;
+  }
+  .brand-name {
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--primary);
+    letter-spacing: -0.3px;
+  }
+  .brand-tag {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-left: 12px;
+    padding-left: 12px;
+    border-left: 1px solid var(--border);
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+  }
+  .topbar-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .btn-ghost {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    padding: 8px 14px;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    font-family: var(--font-body);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-ghost:hover {
+    border-color: var(--primary-2);
+    color: var(--primary);
+  }
+
+  /* ---------- Stepper ---------- */
+  .stepper {
+    background: var(--surface);
+    padding: 24px 32px 32px;
+    border-bottom: 1px solid var(--border);
+  }
+  .stepper-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 0;
+  }
+  .step-pill {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 0;
+  }
+  .step-num {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--surface-2);
+    border: 2px solid var(--border-strong);
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 14px;
+    transition: all 0.2s;
+  }
+  .step-pill.active .step-num {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: white;
+  }
+  .step-pill.complete .step-num {
+    background: var(--primary-light);
+    border-color: var(--primary-2);
+    color: var(--primary);
+  }
+  .step-text { display: flex; flex-direction: column; }
+  .step-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: var(--text-subtle);
+    font-weight: 600;
+  }
+  .step-pill.active .step-label { color: var(--primary-2); }
+  .step-title {
+    font-size: 14px;
+    color: var(--text-muted);
+    font-weight: 500;
+  }
+  .step-pill.active .step-title { color: var(--text); font-weight: 600; }
+  .step-divider {
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+    margin: 0 18px;
+  }
+
+  /* ---------- Main layout ---------- */
+  .main {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 36px 32px 64px;
+    display: grid;
+    grid-template-columns: 1fr 360px;
+    gap: 36px;
+  }
+  @media (max-width: 900px) {
+    .main { grid-template-columns: 1fr; padding: 24px 18px 64px; }
+    .topbar { padding: 14px 18px; }
+    .stepper { padding: 18px 18px 22px; }
+    .brand-tag { display: none; }
+  }
+
+  /* ---------- Form column ---------- */
+  .panel-header { margin-bottom: 28px; }
+  .panel-title {
+    font-family: var(--font-display);
+    font-size: 30px;
+    font-weight: 700;
+    color: var(--text);
+    margin: 0 0 6px;
+    letter-spacing: -0.5px;
+  }
+  .panel-subtitle {
+    color: var(--text-muted);
+    font-size: 15px;
+    margin: 0;
+  }
+
+  .section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 28px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow-sm);
+  }
+  .section-title {
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--primary);
+    margin: 0 0 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-title::before {
+    content: '';
+    width: 4px;
+    height: 18px;
+    background: var(--accent);
+    border-radius: 2px;
+  }
+
+  .field { margin-bottom: 22px; }
+  .field:last-child { margin-bottom: 0; }
+  .field-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+  }
+  @media (max-width: 600px) {
+    .field-row { grid-template-columns: 1fr; }
+  }
+  .label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 8px;
+    letter-spacing: 0.1px;
+  }
+  .label-meta {
+    font-weight: 400;
+    color: var(--text-muted);
+    margin-left: 8px;
+    font-size: 12px;
+  }
+  .input,
+  .select {
+    width: 100%;
+    padding: 12px 14px;
+    font-size: 15px;
+    font-family: var(--font-body);
+    color: var(--text);
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-md);
+    transition: all 0.15s;
+  }
+  .input:focus,
+  .select:focus {
+    outline: none;
+    border-color: var(--primary-2);
+    box-shadow: 0 0 0 3px rgba(45, 106, 79, 0.12);
+  }
+  .input-with-prefix {
+    position: relative;
+  }
+  .input-prefix {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    font-size: 15px;
+    font-weight: 500;
+    pointer-events: none;
+  }
+  .input-with-prefix .input { padding-left: 38px; }
+
+  /* Slider */
+  .slider-wrap {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-top: 4px;
+  }
+  .slider {
+    flex: 1;
+    -webkit-appearance: none;
+    appearance: none;
+    height: 6px;
+    border-radius: 3px;
+    background: var(--surface-2);
+    outline: none;
+  }
+  .slider::-webkit-slider-runnable-track {
+    height: 6px;
+    border-radius: 3px;
+    background: linear-gradient(to right, var(--primary-2) 0%, var(--primary-2) var(--fill, 50%), var(--surface-2) var(--fill, 50%), var(--surface-2) 100%);
+  }
+  .slider::-moz-range-track {
+    height: 6px;
+    border-radius: 3px;
+    background: var(--surface-2);
+  }
+  .slider::-moz-range-progress {
+    height: 6px;
+    border-radius: 3px;
+    background: var(--primary-2);
+  }
+  .slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--surface);
+    border: 2px solid var(--primary);
+    margin-top: -7px;
+    cursor: pointer;
+    box-shadow: var(--shadow-sm);
+    transition: transform 0.15s;
+  }
+  .slider::-webkit-slider-thumb:hover { transform: scale(1.15); }
+  .slider::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--surface);
+    border: 2px solid var(--primary);
+    cursor: pointer;
+    box-shadow: var(--shadow-sm);
+  }
+  .slider-value {
+    min-width: 70px;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+    color: var(--primary);
+    font-size: 15px;
+  }
+  .slider-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--text-subtle);
+    margin-top: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+
+  /* Stepper for dependents */
+  .stepper-input {
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    background: var(--surface);
+  }
+  .stepper-btn {
+    width: 38px;
+    height: 42px;
+    border: none;
+    background: var(--surface);
+    color: var(--primary);
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.1s;
+  }
+  .stepper-btn:hover { background: var(--surface-2); }
+  .stepper-btn:disabled { color: var(--text-subtle); cursor: not-allowed; }
+  .stepper-num {
+    width: 48px;
+    text-align: center;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    color: var(--text);
+    border-left: 1px solid var(--border);
+    border-right: 1px solid var(--border);
+    line-height: 42px;
+  }
+
+  /* CTA */
+  .cta-row {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-top: 28px;
+    flex-wrap: wrap;
+  }
+  .btn-primary {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 13px 24px;
+    border-radius: var(--radius-md);
+    font-size: 15px;
+    font-weight: 600;
+    font-family: var(--font-body);
+    cursor: pointer;
+    transition: all 0.15s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: var(--shadow-sm);
+  }
+  .btn-primary:hover {
+    background: var(--primary-2);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-1px);
+  }
+  .btn-primary:disabled {
+    background: var(--text-subtle);
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+  .btn-secondary {
+    background: transparent;
+    color: var(--text-muted);
+    border: 1px solid var(--border-strong);
+    padding: 13px 20px;
+    border-radius: var(--radius-md);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: var(--font-body);
+  }
+  .btn-secondary:hover { border-color: var(--primary-2); color: var(--primary); }
+
+  /* ---------- Snapshot column ---------- */
+  .snapshot {
+    position: sticky;
+    top: 24px;
+    align-self: start;
+  }
+  .snapshot-card {
+    background: linear-gradient(165deg, var(--primary) 0%, #143524 100%);
+    color: white;
+    border-radius: var(--radius-xl);
+    padding: 26px;
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+    position: relative;
+  }
+  .snapshot-card::before {
+    content: '';
+    position: absolute;
+    top: -40px;
+    right: -40px;
+    width: 160px;
+    height: 160px;
+    background: radial-gradient(circle, rgba(184, 134, 11, 0.18) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .snapshot-eyebrow {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--accent-light);
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+  .snapshot-name {
+    font-family: var(--font-display);
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 22px;
+    letter-spacing: -0.3px;
+    min-height: 28px;
+  }
+  .snapshot-name.placeholder { color: rgba(255,255,255,0.45); font-style: italic; font-weight: 500; font-size: 18px; }
+
+  .snap-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    gap: 12px;
+  }
+  .snap-row:last-of-type { border-bottom: none; }
+  .snap-label {
+    font-size: 13px;
+    color: rgba(255,255,255,0.7);
+  }
+  .snap-value {
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    font-size: 15px;
+  }
+  .snap-value.big {
+    font-family: var(--font-display);
+    font-size: 22px;
+    color: var(--accent-light);
+  }
+
+  .snap-divider {
+    height: 1px;
+    background: rgba(255,255,255,0.12);
+    margin: 14px 0;
+  }
+
+  .snap-derived {
+    background: rgba(255,255,255,0.06);
+    border-radius: var(--radius-md);
+    padding: 12px 14px;
+    margin-top: 16px;
+    border-left: 3px solid var(--accent);
+  }
+  .snap-derived-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: rgba(255,255,255,0.6);
+    margin-bottom: 4px;
+  }
+  .snap-derived-value {
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 700;
+  }
+  .snap-derived-sub {
+    font-size: 11px;
+    color: rgba(255,255,255,0.55);
+    margin-top: 4px;
+    font-variant-numeric: tabular-nums;
+  }
+  .snap-derived-sub:empty { display: none; }
+
+  .footnote {
+    font-size: 12px;
+    color: var(--text-subtle);
+    margin-top: 16px;
+    line-height: 1.5;
+    text-align: center;
+  }
+
+  /* ---------- Step panels ---------- */
+  .step-panel { display: block; }
+  .step-panel.hidden { display: none; }
+
+  /* ---------- Step 2: Allocation bar ---------- */
+  .alloc-bar {
+    display: flex;
+    height: 28px;
+    border-radius: 999px;
+    overflow: hidden;
+    background: var(--surface-2);
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.04);
+    margin: 6px 0 18px;
+  }
+  .alloc-seg {
+    height: 100%;
+    transition: width 0.25s ease;
+    min-width: 0;
+  }
+  .alloc-seg-cash {
+    background: repeating-linear-gradient(
+      45deg,
+      rgba(156, 163, 175, 0.35),
+      rgba(156, 163, 175, 0.35) 6px,
+      rgba(156, 163, 175, 0.55) 6px,
+      rgba(156, 163, 175, 0.55) 12px
+    );
+  }
+  .alloc-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 14px;
+    margin-top: 6px;
+  }
+  .legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+  .legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 3px;
+    flex-shrink: 0;
+  }
+  .legend-dot.cash {
+    background: repeating-linear-gradient(
+      45deg,
+      rgba(156, 163, 175, 0.5),
+      rgba(156, 163, 175, 0.5) 3px,
+      rgba(156, 163, 175, 0.85) 3px,
+      rgba(156, 163, 175, 0.85) 6px
+    );
+  }
+
+  /* ---------- Step 2: Overview stats ---------- */
+  .overview-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-top: 18px;
+  }
+  @media (max-width: 700px) {
+    .overview-stats { grid-template-columns: repeat(2, 1fr); }
+  }
+  .stat-tile {
+    background: var(--surface-2);
+    border-radius: var(--radius-md);
+    padding: 12px 14px;
+  }
+  .stat-tile.warn { background: #FEF3C7; border: 1px solid #FCD34D; }
+  .stat-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .stat-value {
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+  }
+  .stat-value.primary { color: var(--primary); }
+  .stat-value.warn { color: #92400E; }
+
+  /* ---------- Step 2: Asset cards ---------- */
+  .asset-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 22px 24px;
+    margin-bottom: 14px;
+    box-shadow: var(--shadow-sm);
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .asset-card:hover { border-color: var(--border-strong); }
+  .asset-card.dimmed { opacity: 0.65; }
+  .asset-head {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    margin-bottom: 14px;
+  }
+  .asset-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  .asset-meta { flex: 1; min-width: 0; }
+  .asset-name {
+    font-family: var(--font-display);
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.25;
+  }
+  .asset-sub {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 2px;
+    line-height: 1.4;
+  }
+  .asset-amount { text-align: right; flex-shrink: 0; }
+  .asset-amount-val {
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--primary);
+    font-variant-numeric: tabular-nums;
+  }
+  .asset-amount-meta {
+    font-size: 11px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    margin-top: 2px;
+    font-weight: 600;
+  }
+
+  .asset-slider-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 14px;
+  }
+  .asset-slider-row .slider { flex: 1; }
+  .asset-slider-val {
+    min-width: 56px;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    color: var(--primary);
+    font-size: 15px;
+  }
+
+  .asset-assumptions {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    padding-top: 14px;
+    border-top: 1px dashed var(--border);
+  }
+  @media (max-width: 700px) {
+    .asset-assumptions { grid-template-columns: repeat(2, 1fr); }
+  }
+  .asset-assumption {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .asset-assumption-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+    font-weight: 600;
+  }
+  .asset-assumption-input {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .mini-input {
+    width: 100%;
+    padding: 6px 8px;
+    font-size: 14px;
+    font-family: var(--font-body);
+    color: var(--text);
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    border-radius: 6px;
+    font-variant-numeric: tabular-nums;
+  }
+  .mini-input:focus {
+    outline: none;
+    border-color: var(--primary-2);
+    box-shadow: 0 0 0 2px rgba(45, 106, 79, 0.12);
+  }
+  .mini-suffix {
+    font-size: 13px;
+    color: var(--text-muted);
+    font-weight: 500;
+  }
+  .mini-readout {
+    padding: 6px 8px;
+    font-size: 14px;
+    color: var(--primary);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+  .mini-readout.muted { color: var(--text-muted); font-weight: 500; }
+  .mini-readout.big { font-size: 14px; font-weight: 700; color: var(--text); }
+
+  .asset-note {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-style: italic;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px dashed var(--border);
+  }
+
+  /* Cash card variant */
+  .asset-card.cash {
+    background: var(--surface-2);
+    border-style: dashed;
+  }
+
+  /* ---------- Asset card: learn more link ---------- */
+  .asset-learn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 6px;
+    font-size: 12px;
+    color: var(--primary-2);
+    text-decoration: none;
+    font-weight: 600;
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 0;
+    font-family: var(--font-body);
+  }
+  .asset-learn:hover { color: var(--primary); text-decoration: underline; }
+  .asset-learn::after { content: '→'; font-weight: 700; }
+
+  /* ---------- Modal ---------- */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(20, 30, 25, 0.55);
+    z-index: 100;
+    display: none;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 40px 20px;
+    overflow-y: auto;
+  }
+  .modal-overlay.open {
+    display: flex;
+    animation: modalFade 0.18s ease;
+  }
+  @keyframes modalFade {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  @keyframes modalSlide {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .modal-dialog {
+    background: var(--surface);
+    border-radius: var(--radius-xl);
+    max-width: 720px;
+    width: 100%;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.25);
+    animation: modalSlide 0.22s ease;
+    margin: auto 0;
+  }
+  .modal-head {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 24px 28px 20px;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    background: var(--surface);
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+    z-index: 1;
+  }
+  .modal-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+  .modal-head-text { flex: 1; min-width: 0; }
+  .modal-title {
+    font-family: var(--font-display);
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text);
+    margin: 0;
+    line-height: 1.2;
+    letter-spacing: -0.3px;
+  }
+  .modal-subtitle {
+    color: var(--text-muted);
+    font-size: 13px;
+    margin-top: 4px;
+    line-height: 1.4;
+  }
+  .modal-close {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.15s;
+  }
+  .modal-close:hover {
+    background: var(--surface-2);
+    color: var(--text);
+    border-color: var(--border-strong);
+  }
+  .modal-body {
+    padding: 22px 28px 26px;
+  }
+  .modal-section {
+    margin-bottom: 22px;
+  }
+  .modal-section:last-child { margin-bottom: 0; }
+  .modal-section h3 {
+    font-family: var(--font-display);
+    font-size: 15px;
+    color: var(--primary);
+    margin: 0 0 8px;
+    font-weight: 700;
+    letter-spacing: 0.1px;
+  }
+  .modal-section p {
+    margin: 0 0 8px;
+    color: var(--text);
+    line-height: 1.6;
+    font-size: 14px;
+  }
+  .modal-section p:last-child { margin-bottom: 0; }
+  .modal-list {
+    margin: 4px 0 0;
+    padding-left: 18px;
+    color: var(--text);
+  }
+  .modal-list li {
+    margin-bottom: 6px;
+    line-height: 1.55;
+    font-size: 14px;
+  }
+  .modal-list li strong { color: var(--primary); font-weight: 700; }
+
+  .modal-pillrow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 4px;
+  }
+  .modal-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    background: var(--primary-light);
+    color: var(--primary);
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .modal-factsheets {
+    background: var(--surface-2);
+    border-radius: var(--radius-md);
+    padding: 16px 18px;
+    margin-top: 6px;
+  }
+  .modal-factsheets-title {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+    font-weight: 700;
+    margin-bottom: 10px;
+  }
+  .modal-factsheet-link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    color: var(--text);
+    text-decoration: none;
+    border-radius: 6px;
+    font-size: 13px;
+    transition: background 0.1s;
+  }
+  .modal-factsheet-link:hover { background: var(--surface); }
+  .modal-factsheet-link::before {
+    content: '📄';
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+  .modal-factsheet-link span.fs-name { flex: 1; }
+  .modal-factsheet-link .fs-arrow {
+    color: var(--text-subtle);
+    font-size: 12px;
+  }
+  .modal-empty-fs {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-style: italic;
+    padding: 4px 0;
+  }
+
+  /* ---------- Step 3: timeline cards ---------- */
+  .timeline-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+  }
+  @media (max-width: 700px) { .timeline-grid { grid-template-columns: 1fr; } }
+  .timeline-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 16px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .timeline-card-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .timeline-icon {
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+  .timeline-name {
+    font-weight: 700;
+    color: var(--text);
+    font-size: 14px;
+    flex: 1;
+  }
+  .timeline-mode {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 999px;
+  }
+  .timeline-mode.reinvest { background: var(--primary-light); color: var(--primary); }
+  .timeline-mode.payout { background: var(--accent-light); color: #6B4E0A; }
+  .timeline-controls {
+    display: flex;
+    gap: 14px;
+    align-items: center;
+  }
+  .timeline-slider {
+    flex: 1;
+  }
+  .timeline-slider-val {
+    min-width: 38px;
+    font-weight: 700;
+    color: var(--primary);
+    font-variant-numeric: tabular-nums;
+    font-size: 14px;
+    text-align: right;
+  }
+  .timeline-summary {
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.45;
+    padding-top: 8px;
+    border-top: 1px dashed var(--border);
+  }
+  .timeline-summary strong { color: var(--text); font-weight: 700; }
+
+  /* ---------- Step 3: chart ---------- */
+  .chart-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 24px 24px 16px;
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 20px;
+  }
+  .chart-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .chart-title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    color: var(--primary);
+    font-size: 17px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .chart-title::before {
+    content: '';
+    width: 4px;
+    height: 18px;
+    background: var(--accent);
+    border-radius: 2px;
+  }
+  .chart-toggle-row {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+  .chart-toggle {
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    color: var(--text-muted);
+    padding: 6px 11px;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    font-family: var(--font-body);
+    transition: all 0.1s;
+  }
+  .chart-toggle:hover { border-color: var(--primary-2); color: var(--primary); }
+  .chart-toggle.active {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: white;
+  }
+  .chart-svg-wrap {
+    width: 100%;
+    overflow-x: auto;
+  }
+  .chart-svg {
+    width: 100%;
+    height: auto;
+    min-width: 600px;
+    display: block;
+  }
+  .chart-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 16px;
+    margin-top: 12px;
+    padding-top: 14px;
+    border-top: 1px dashed var(--border);
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+  .chart-legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .chart-legend-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+    flex-shrink: 0;
+  }
+  .chart-legend-line {
+    width: 18px;
+    height: 2px;
+    flex-shrink: 0;
+  }
+
+  /* ---------- Step 3: milestone cards ---------- */
+  .milestone-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+  }
+  @media (max-width: 900px) { .milestone-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 500px) { .milestone-grid { grid-template-columns: 1fr; } }
+  .milestone {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .milestone.highlight { border-color: var(--primary-2); background: linear-gradient(180deg, var(--primary-light) 0%, var(--surface) 50%); }
+  .milestone-age {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: var(--text-muted);
+    font-weight: 700;
+  }
+  .milestone-when {
+    font-size: 13px;
+    color: var(--text);
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+  .milestone-stat-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 6px;
+  }
+  .milestone-stat-value {
+    font-family: var(--font-display);
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--primary);
+    font-variant-numeric: tabular-nums;
+  }
+  .milestone-goals {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px dashed var(--border);
+    font-size: 11px;
+    line-height: 1.5;
+  }
+  .goal-line {
+    display: flex;
+    justify-content: space-between;
+    gap: 6px;
+  }
+  .goal-pass { color: #047857; font-weight: 700; }
+  .goal-near { color: #B45309; font-weight: 700; }
+  .goal-fail { color: #B91C1C; font-weight: 700; }
+
+  /* ---------- Print report ---------- */
+  .print-report { display: none; }
+
+  /* These styles only apply when the report is rendered (in print) */
+  .print-report .pr-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 2px solid var(--primary);
+    padding-bottom: 8pt;
+    margin-bottom: 12pt;
+  }
+  .print-report .pr-brand {
+    display: flex;
+    align-items: center;
+    gap: 10pt;
+  }
+  .print-report .pr-mark {
+    width: 28pt; height: 28pt; border-radius: 6pt;
+    background: var(--primary); color: white;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-display); font-weight: 700; font-size: 14pt;
+  }
+  .print-report .pr-name { font-family: var(--font-display); font-size: 14pt; font-weight: 700; color: var(--primary); line-height: 1; }
+  .print-report .pr-tag { font-size: 9pt; color: var(--text-muted); margin-top: 2pt; letter-spacing: 0.4pt; text-transform: uppercase; }
+  .print-report .pr-date { font-size: 9pt; color: var(--text-muted); }
+  .print-report .pr-title {
+    font-family: var(--font-display);
+    font-size: 22pt;
+    font-weight: 700;
+    color: var(--text);
+    margin: 0 0 4pt;
+    line-height: 1.15;
+  }
+  .print-report .pr-subtitle {
+    font-size: 10pt;
+    color: var(--text-muted);
+    margin: 0 0 14pt;
+  }
+  .print-report .pr-section {
+    margin-top: 14pt;
+    page-break-inside: avoid;
+  }
+  .print-report .pr-section h2 {
+    font-family: var(--font-display);
+    font-size: 12pt;
+    color: var(--primary);
+    margin: 0 0 8pt;
+    padding-bottom: 3pt;
+    border-bottom: 1px solid var(--primary-light);
+    letter-spacing: 0.2pt;
+  }
+  .print-report .pr-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8pt 14pt;
+  }
+  .print-report .pr-grid > div {
+    background: var(--surface-2);
+    padding: 6pt 8pt;
+    border-radius: 4pt;
+  }
+  .print-report .pr-grid label {
+    display: block;
+    font-size: 8pt;
+    text-transform: uppercase;
+    letter-spacing: 0.4pt;
+    color: var(--text-muted);
+    font-weight: 600;
+    margin-bottom: 2pt;
+  }
+  .print-report .pr-grid span {
+    font-weight: 700;
+    color: var(--text);
+    font-size: 11pt;
+    font-variant-numeric: tabular-nums;
+  }
+  .print-report .pr-targets {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8pt;
+    margin-top: 8pt;
+  }
+  .print-report .pr-target {
+    background: var(--primary-light);
+    border-left: 3pt solid var(--primary);
+    padding: 6pt 8pt;
+    border-radius: 0 4pt 4pt 0;
+  }
+  .print-report .pr-target label {
+    font-size: 8pt;
+    text-transform: uppercase;
+    letter-spacing: 0.4pt;
+    color: var(--primary);
+    font-weight: 700;
+  }
+  .print-report .pr-target span {
+    font-weight: 700;
+    color: var(--text);
+    font-size: 11pt;
+    font-variant-numeric: tabular-nums;
+    display: block;
+    margin-top: 1pt;
+  }
+  .print-report .pr-target-sub {
+    font-size: 8pt;
+    color: var(--text-muted);
+    font-weight: 500 !important;
+    margin-top: 2pt;
+  }
+  .print-report .pr-allocbar {
+    display: flex;
+    height: 14pt;
+    border-radius: 999pt;
+    overflow: hidden;
+    background: var(--surface-2);
+    margin-bottom: 8pt;
+  }
+  .print-report .pr-allocbar-seg { height: 100%; }
+  .print-report .pr-allocbar-seg.cash {
+    background: repeating-linear-gradient(
+      45deg,
+      rgba(156, 163, 175, 0.4),
+      rgba(156, 163, 175, 0.4) 4pt,
+      rgba(156, 163, 175, 0.7) 4pt,
+      rgba(156, 163, 175, 0.7) 8pt
+    );
+  }
+  .print-report table.pr-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 9.5pt;
+  }
+  .print-report .pr-table th {
+    text-align: left;
+    padding: 5pt 6pt;
+    font-size: 8.5pt;
+    text-transform: uppercase;
+    letter-spacing: 0.3pt;
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--border-strong);
+    font-weight: 700;
+  }
+  .print-report .pr-table th.num,
+  .print-report .pr-table td.num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+  .print-report .pr-table td {
+    padding: 6pt;
+    border-bottom: 1px solid var(--border);
+  }
+  .print-report .pr-table tr:last-child td { border-bottom: none; }
+  .print-report .pr-table .pr-asset-cell {
+    display: flex;
+    align-items: center;
+    gap: 6pt;
+  }
+  .print-report .pr-asset-dot {
+    width: 10pt; height: 10pt; border-radius: 2pt; flex-shrink: 0;
+  }
+  .print-report .pr-asset-dot.cash {
+    background: repeating-linear-gradient(
+      45deg,
+      rgba(156, 163, 175, 0.4),
+      rgba(156, 163, 175, 0.4) 2pt,
+      rgba(156, 163, 175, 0.7) 2pt,
+      rgba(156, 163, 175, 0.7) 4pt
+    );
+  }
+  .print-report .pr-chart {
+    width: 100%;
+    margin-top: 4pt;
+  }
+  .print-report .pr-chart svg {
+    width: 100%;
+    height: auto;
+    max-height: 105mm;
+    display: block;
+  }
+  .print-report .pr-milestones {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6pt;
+  }
+  .print-report .pr-milestone {
+    background: var(--surface-2);
+    border-radius: 4pt;
+    padding: 8pt;
+  }
+  .print-report .pr-milestone.highlight {
+    background: var(--primary-light);
+  }
+  .print-report .pr-milestone-age {
+    font-size: 8pt;
+    text-transform: uppercase;
+    letter-spacing: 0.3pt;
+    color: var(--text-muted);
+    font-weight: 700;
+  }
+  .print-report .pr-milestone-when {
+    font-size: 9pt;
+    color: var(--text);
+    font-weight: 600;
+    margin-bottom: 4pt;
+  }
+  .print-report .pr-milestone-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 9pt;
+    margin-top: 2pt;
+  }
+  .print-report .pr-milestone-row span:last-child {
+    font-weight: 700;
+    color: var(--primary);
+    font-variant-numeric: tabular-nums;
+  }
+  .print-report .pr-footer {
+    margin-top: 14pt;
+    padding-top: 8pt;
+    border-top: 1px solid var(--border);
+    font-size: 8.5pt;
+    color: var(--text-muted);
+    text-align: center;
+    letter-spacing: 0.3pt;
+  }
+
+  /* When printing, show the report and hide everything else */
+  @media print {
+    @page {
+      size: A4;
+      margin: 14mm;
+    }
+    html, body {
+      background: white !important;
+      color: var(--text) !important;
+    }
+    .topbar, .stepper, .step-panel, .snapshot,
+    .footnote, .modal-overlay, .toast {
+      display: none !important;
+    }
+    main.main {
+      display: block !important;
+      padding: 0 !important;
+      max-width: none !important;
+      margin: 0 !important;
+      gap: 0 !important;
+      grid-template-columns: 1fr !important;
+    }
+    .print-report {
+      display: block !important;
+    }
+    /* Avoid breaks inside key sections; allow between */
+    .pr-section { break-inside: avoid; }
+    .pr-section.pr-page-break { break-before: page; }
+  }
+
+  /* ---------- Snapshot: plan section ---------- */
+  .snap-plan {
+    margin-top: 18px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(255,255,255,0.12);
+  }
+  .snap-plan-title {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: var(--accent-light);
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+
+  /* Validation banner */
+  .banner {
+    background: #FEF3C7;
+    border: 1px solid #FCD34D;
+    color: #92400E;
+    padding: 10px 14px;
+    border-radius: var(--radius-md);
+    font-size: 13px;
+    margin-bottom: 16px;
+    display: none;
+  }
+  .banner.show { display: block; }
+
+  /* Toast for "Continue" feedback */
+  .toast {
+    position: fixed;
+    bottom: 28px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--text);
+    color: white;
+    padding: 12px 20px;
+    border-radius: var(--radius-md);
+    font-size: 14px;
+    box-shadow: var(--shadow-lg);
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.25s;
+  }
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+</style>
+</head>
+<body>
+
+<!-- Top bar -->
+<header class="topbar">
+  <div class="brand">
+    <div class="brand-mark">F</div>
+    <div class="brand-name">FIN</div>
+    <div class="brand-tag">Wealth Portfolio Calculator</div>
+  </div>
+  <div class="topbar-actions">
+    <button class="btn-ghost" id="printBtn">Print summary</button>
+    <button class="btn-ghost" id="resetBtn">Reset</button>
+  </div>
+</header>
+
+<!-- Step indicator -->
+<div class="stepper">
+  <div class="stepper-inner">
+    <div class="step-pill active" id="pill1" data-step="1" role="button" tabindex="0">
+      <div class="step-num" id="pill1-num">1</div>
+      <div class="step-text">
+        <span class="step-label">Step 1</span>
+        <span class="step-title">Your Profile</span>
+      </div>
+    </div>
+    <div class="step-divider"></div>
+    <div class="step-pill" id="pill2" data-step="2" role="button" tabindex="0">
+      <div class="step-num" id="pill2-num">2</div>
+      <div class="step-text">
+        <span class="step-label">Step 2</span>
+        <span class="step-title">Asset Allocation</span>
+      </div>
+    </div>
+    <div class="step-divider"></div>
+    <div class="step-pill" id="pill3" data-step="3" role="button" tabindex="0">
+      <div class="step-num" id="pill3-num">3</div>
+      <div class="step-text">
+        <span class="step-label">Step 3</span>
+        <span class="step-title">Year-by-Year Plan</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Main two-column -->
+<main class="main">
+  <!-- Form column wraps both Step 1 and Step 2 panels -->
+  <div>
+
+  <!-- =========== STEP 1 =========== -->
+  <div class="step-panel" id="step1Panel">
+    <div class="panel-header">
+      <h1 class="panel-title">Tell us about you</h1>
+      <p class="panel-subtitle">A few details so we can build your retirement plan. You can adjust everything as we go.</p>
+    </div>
+
+    <div class="banner" id="banner"></div>
+
+    <!-- About you -->
+    <div class="section">
+      <h2 class="section-title">About you</h2>
+
+      <div class="field">
+        <label class="label" for="clientName">Client / household name</label>
+        <input type="text" class="input" id="clientName" placeholder="e.g. Dr Tan or The Tan Family" autocomplete="off" />
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label class="label" for="currentAgeSlider">Current age</label>
+          <div class="slider-wrap">
+            <input type="range" class="slider" id="currentAgeSlider" min="25" max="85" value="50" />
+            <div class="slider-value" id="currentAgeValue">50</div>
+          </div>
+          <div class="slider-meta"><span>25</span><span>85</span></div>
+        </div>
+
+        <div class="field">
+          <label class="label" for="retireAgeSlider">Retirement age <span class="label-meta">when payouts begin</span></label>
+          <div class="slider-wrap">
+            <input type="range" class="slider" id="retireAgeSlider" min="40" max="90" value="65" />
+            <div class="slider-value" id="retireAgeValue">65</div>
+          </div>
+          <div class="slider-meta"><span>40</span><span>90</span></div>
+        </div>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label class="label">Dependents <span class="label-meta">spouse, children, parents</span></label>
+          <div class="stepper-input">
+            <button class="stepper-btn" id="depMinus" aria-label="Decrease dependents">−</button>
+            <div class="stepper-num" id="depValue">0</div>
+            <button class="stepper-btn" id="depPlus" aria-label="Increase dependents">+</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Your wealth -->
+    <div class="section">
+      <h2 class="section-title">Your wealth</h2>
+
+      <div class="field">
+        <label class="label" for="assets">Current investible financial assets <span class="label-meta">cash + liquid investments</span></label>
+        <div class="input-with-prefix">
+          <span class="input-prefix">S$</span>
+          <input type="text" class="input" id="assets" inputmode="numeric" value="1,000,000" />
+        </div>
+        <div class="slider-wrap" style="margin-top: 12px;">
+          <input type="range" class="slider" id="assetsSlider" min="100000" max="10000000" step="50000" value="1000000" />
+        </div>
+        <div class="slider-meta"><span>S$100K</span><span>S$10M</span></div>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label class="label" for="incomeNeed">Annual income needed at retirement <span class="label-meta">today's dollars · optional</span></label>
+          <div class="input-with-prefix">
+            <span class="input-prefix">S$</span>
+            <input type="text" class="input" id="incomeNeed" inputmode="numeric" placeholder="e.g. 120,000" />
+          </div>
+        </div>
+        <div class="field">
+          <label class="label" for="legacy">Target legacy amount <span class="label-meta">today's dollars · optional</span></label>
+          <div class="input-with-prefix">
+            <span class="input-prefix">S$</span>
+            <input type="text" class="input" id="legacy" inputmode="numeric" placeholder="e.g. 2,000,000" />
+          </div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="label" for="inflationSlider">Inflation assumption <span class="label-meta">applied to income &amp; legacy targets</span></label>
+        <div class="slider-wrap">
+          <input type="range" class="slider" id="inflationSlider" min="0" max="8" step="0.1" value="3" />
+          <div class="slider-value" id="inflationValue">3.0%</div>
+        </div>
+        <div class="slider-meta"><span>0%</span><span>8%</span></div>
+      </div>
+    </div>
+
+    <!-- CTA -->
+    <div class="cta-row">
+      <button class="btn-primary" id="continueBtn">
+        Continue to Step 2
+        <span aria-hidden="true">→</span>
+      </button>
+    </div>
+  </div>
+  <!-- =========== END STEP 1 =========== -->
+
+  <!-- =========== STEP 2 =========== -->
+  <div class="step-panel hidden" id="step2Panel">
+    <div class="panel-header">
+      <h1 class="panel-title">Allocate across asset classes</h1>
+      <p class="panel-subtitle">Decide how to deploy your portfolio. <span id="assetsEcho">S$1,000,000</span> spread across four asset classes — anything not allocated stays in cash.</p>
+    </div>
+
+    <div class="banner" id="overBanner"></div>
+
+    <!-- Allocation overview -->
+    <div class="section">
+      <h2 class="section-title">Allocation overview</h2>
+      <div class="alloc-bar" id="allocBar">
+        <div class="alloc-seg" id="seg-private" style="background:#2D6A4F; width:20%"></div>
+        <div class="alloc-seg" id="seg-structured" style="background:#B8860B; width:25%"></div>
+        <div class="alloc-seg" id="seg-capprotected" style="background:#40916C; width:35%"></div>
+        <div class="alloc-seg" id="seg-indexannuity" style="background:#A87544; width:20%"></div>
+        <div class="alloc-seg alloc-seg-cash" id="seg-cash" style="width:0%"></div>
+      </div>
+      <div class="alloc-legend">
+        <div class="legend-item"><span class="legend-dot" style="background:#2D6A4F"></span>Private Markets</div>
+        <div class="legend-item"><span class="legend-dot" style="background:#B8860B"></span>Structured Notes</div>
+        <div class="legend-item"><span class="legend-dot" style="background:#40916C"></span>Capital Protected Funds</div>
+        <div class="legend-item"><span class="legend-dot" style="background:#A87544"></span>Index Income Annuity</div>
+        <div class="legend-item"><span class="legend-dot cash"></span>Cash &amp; MMF (residual)</div>
+      </div>
+
+      <div class="overview-stats">
+        <div class="stat-tile">
+          <div class="stat-label">Allocated</div>
+          <div class="stat-value primary" id="stat-allocated">100.0%</div>
+        </div>
+        <div class="stat-tile">
+          <div class="stat-label">Cash residual</div>
+          <div class="stat-value" id="stat-cash">0.0%</div>
+        </div>
+        <div class="stat-tile">
+          <div class="stat-label">Blended net ROI</div>
+          <div class="stat-value primary" id="stat-blended">8.03%</div>
+        </div>
+        <div class="stat-tile">
+          <div class="stat-label">Est. annual return</div>
+          <div class="stat-value primary" id="stat-return">S$80,250</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Asset cards (rendered into here by JS) -->
+    <div id="assetCards"></div>
+
+    <!-- Cash residual card -->
+    <div class="asset-card cash" id="cashCard">
+      <div class="asset-head">
+        <div class="asset-icon" style="background:#9CA3AF">$</div>
+        <div class="asset-meta">
+          <div class="asset-name">Cash &amp; MMF</div>
+          <div class="asset-sub">Residual — held in money-market until deployed</div>
+        </div>
+        <div class="asset-amount">
+          <div class="asset-amount-val" id="amount-cash">S$0</div>
+          <div class="asset-amount-meta" id="amountmeta-cash">0% of portfolio</div>
+        </div>
+      </div>
+      <div class="asset-assumptions">
+        <div class="asset-assumption">
+          <div class="asset-assumption-label">Yield</div>
+          <div class="asset-assumption-input">
+            <input type="number" id="gross-cash" class="mini-input" value="3.0" step="0.1" min="0" max="20" />
+            <span class="mini-suffix">%</span>
+          </div>
+        </div>
+        <div class="asset-assumption">
+          <div class="asset-assumption-label">Fees</div>
+          <div class="mini-readout muted">0.0%</div>
+        </div>
+        <div class="asset-assumption">
+          <div class="asset-assumption-label">Net yield</div>
+          <div class="mini-readout" id="net-cash">3.0%</div>
+        </div>
+        <div class="asset-assumption">
+          <div class="asset-assumption-label">Annual return</div>
+          <div class="mini-readout big" id="ret-cash">S$0</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CTA -->
+    <div class="cta-row">
+      <button class="btn-secondary" id="backToStep1Btn">← Back to Step 1</button>
+      <button class="btn-primary" id="continueToStep3Btn">
+        Continue to Step 3
+        <span aria-hidden="true">→</span>
+      </button>
+    </div>
+  </div>
+  <!-- =========== END STEP 2 =========== -->
+
+  <!-- =========== STEP 3 =========== -->
+  <div class="step-panel hidden" id="step3Panel">
+    <div class="panel-header">
+      <h1 class="panel-title">Year-by-year plan</h1>
+      <p class="panel-subtitle">See how your wealth grows and pays out over time. For each asset class, choose the age at which it switches from <em>reinvesting</em> to <em>paying out</em> income.</p>
+    </div>
+
+    <!-- Per-asset payout-start controls -->
+    <div class="section">
+      <h2 class="section-title">When does each bucket start paying income?</h2>
+      <p style="color: var(--text-muted); font-size: 14px; margin: -6px 0 18px;">Slide each control to set the age at which that asset class begins distributing income. Before this age the bucket reinvests; after, it freezes and pays out.</p>
+      <div class="timeline-grid" id="timelineGrid"></div>
+    </div>
+
+    <!-- Projection chart -->
+    <div class="chart-card">
+      <div class="chart-head">
+        <div class="chart-title">Wealth projection</div>
+        <div class="chart-toggle-row">
+          <span>End age:</span>
+          <button class="chart-toggle" data-end="85">85</button>
+          <button class="chart-toggle active" data-end="90">90</button>
+          <button class="chart-toggle" data-end="100">100</button>
+          <button class="chart-toggle" data-end="120">120</button>
+        </div>
+      </div>
+      <div class="chart-svg-wrap" id="chartWrap"></div>
+      <div class="chart-legend">
+        <div class="chart-legend-item"><span class="chart-legend-dot" style="background:#A87544"></span>Index Income Annuity</div>
+        <div class="chart-legend-item"><span class="chart-legend-dot" style="background:#40916C"></span>Capital Protected Funds</div>
+        <div class="chart-legend-item"><span class="chart-legend-dot" style="background:#2D6A4F"></span>Private Markets</div>
+        <div class="chart-legend-item"><span class="chart-legend-dot" style="background:#B8860B"></span>Structured Notes</div>
+        <div class="chart-legend-item"><span class="chart-legend-dot" style="background:#9CA3AF"></span>Cash &amp; MMF</div>
+        <div class="chart-legend-item"><span class="chart-legend-line" style="background:#1A1A1A; border-top: 2px dashed #1A1A1A; height: 0;"></span>Total wealth (assets + income withdrawn)</div>
+        <div class="chart-legend-item"><span class="chart-legend-line" style="background:#B8860B; height: 2.5px;"></span>Cumulative income withdrawn</div>
+      </div>
+    </div>
+
+    <!-- Milestones -->
+    <div class="section">
+      <h2 class="section-title">Milestones</h2>
+      <div class="milestone-grid" id="milestoneGrid"></div>
+    </div>
+
+    <!-- CTA -->
+    <div class="cta-row">
+      <button class="btn-secondary" id="backToStep2Btn">← Back to Step 2</button>
+      <button class="btn-primary" id="printReportBtn">
+        Print summary report
+        <span aria-hidden="true">↓</span>
+      </button>
+      <span style="color: var(--text-subtle); font-size: 13px;">Choose <em>Save as PDF</em> in the print dialog to export.</span>
+    </div>
+  </div>
+  <!-- =========== END STEP 3 =========== -->
+
+  </div>
+  <!-- end form column -->
+
+  <!-- Snapshot panel -->
+  <aside class="snapshot">
+    <div class="snapshot-card">
+      <div class="snapshot-eyebrow">Client snapshot</div>
+      <div class="snapshot-name placeholder" id="snapName">— enter a name above —</div>
+
+      <div class="snap-row">
+        <span class="snap-label">Current age</span>
+        <span class="snap-value" id="snapCurrentAge">50</span>
+      </div>
+      <div class="snap-row">
+        <span class="snap-label">Retirement age</span>
+        <span class="snap-value" id="snapRetireAge">65</span>
+      </div>
+      <div class="snap-row">
+        <span class="snap-label">Dependents</span>
+        <span class="snap-value" id="snapDependents">0</span>
+      </div>
+      <div class="snap-row">
+        <span class="snap-label">Inflation</span>
+        <span class="snap-value" id="snapInflation">3.0%</span>
+      </div>
+
+      <div class="snap-divider"></div>
+
+      <div class="snap-row">
+        <span class="snap-label">Investible assets</span>
+        <span class="snap-value big" id="snapAssets">S$1,000,000</span>
+      </div>
+
+      <div class="snap-derived">
+        <div class="snap-derived-label">Time horizon</div>
+        <div class="snap-derived-value" id="snapHorizon">15 years to retirement</div>
+      </div>
+
+      <div class="snap-derived" id="snapIncomeWrap" style="display:none;">
+        <div class="snap-derived-label">Income target at retirement</div>
+        <div class="snap-derived-value" id="snapIncome">—</div>
+        <div class="snap-derived-sub" id="snapIncomeSub"></div>
+      </div>
+
+      <div class="snap-derived" id="snapLegacyWrap" style="display:none;">
+        <div class="snap-derived-label">Legacy target at retirement</div>
+        <div class="snap-derived-value" id="snapLegacy">—</div>
+        <div class="snap-derived-sub" id="snapLegacySub"></div>
+      </div>
+
+      <!-- Plan section: only visible from Step 2 onwards -->
+      <div class="snap-plan" id="snapPlan" style="display:none;">
+        <div class="snap-plan-title">Plan summary</div>
+        <div class="snap-row">
+          <span class="snap-label">Allocated</span>
+          <span class="snap-value" id="snapAllocated">100%</span>
+        </div>
+        <div class="snap-row">
+          <span class="snap-label">Cash residual</span>
+          <span class="snap-value" id="snapCashRes">S$0</span>
+        </div>
+        <div class="snap-row">
+          <span class="snap-label">Blended net ROI</span>
+          <span class="snap-value" id="snapBlended">—</span>
+        </div>
+        <div class="snap-derived">
+          <div class="snap-derived-label">Estimated annual return</div>
+          <div class="snap-derived-value" id="snapAnnualReturn">—</div>
+          <div class="snap-derived-sub" id="snapAnnualReturnSub"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footnote">
+      Snapshot updates live as you adjust the form.
+    </div>
+  </aside>
+</main>
+
+<!-- Print Summary Report (only visible during printing) -->
+<div class="print-report" id="printReport">
+  <header class="pr-header">
+    <div class="pr-brand">
+      <div class="pr-mark">F</div>
+      <div>
+        <div class="pr-name">FIN</div>
+        <div class="pr-tag">Wealth Portfolio Summary</div>
+      </div>
+    </div>
+    <div class="pr-date" id="prDate"></div>
+  </header>
+
+  <h1 class="pr-title" id="prTitle">Wealth Portfolio Summary</h1>
+  <p class="pr-subtitle" id="prSubtitle"></p>
+
+  <section class="pr-section">
+    <h2>Client profile</h2>
+    <div class="pr-grid">
+      <div><label>Current age</label><span id="prCurAge">—</span></div>
+      <div><label>Retirement age</label><span id="prRetAge">—</span></div>
+      <div><label>Time horizon</label><span id="prHorizon">—</span></div>
+      <div><label>Dependents</label><span id="prDeps">—</span></div>
+      <div><label>Inflation assumption</label><span id="prInfl">—</span></div>
+      <div><label>Investible assets</label><span id="prAssetsAmt">—</span></div>
+    </div>
+    <div class="pr-targets" id="prTargets"></div>
+  </section>
+
+  <section class="pr-section">
+    <h2>Asset allocation</h2>
+    <div class="pr-allocbar" id="prAllocBar"></div>
+    <table class="pr-table">
+      <thead>
+        <tr>
+          <th>Asset class</th>
+          <th class="num">Allocation</th>
+          <th class="num">Capital</th>
+          <th class="num">Net ROI</th>
+          <th class="num">Annual return</th>
+        </tr>
+      </thead>
+      <tbody id="prAllocTable"></tbody>
+    </table>
+  </section>
+
+  <section class="pr-section">
+    <h2>Payout schedule</h2>
+    <table class="pr-table">
+      <thead>
+        <tr>
+          <th>Asset class</th>
+          <th class="num">Income starts at age</th>
+          <th class="num">Reinvest period</th>
+          <th>Mode in year 1</th>
+        </tr>
+      </thead>
+      <tbody id="prScheduleTable"></tbody>
+    </table>
+  </section>
+
+  <section class="pr-section pr-page-break">
+    <h2>Wealth projection (to age <span id="prEndAge">90</span>)</h2>
+    <div class="pr-chart" id="prChart"></div>
+  </section>
+
+  <section class="pr-section">
+    <h2>Milestones</h2>
+    <div class="pr-milestones" id="prMilestones"></div>
+  </section>
+
+  <footer class="pr-footer">
+    Generated <span id="prFooterDate"></span> &middot; FIN Wealth Portfolio Calculator
+  </footer>
+</div>
+
+<!-- Asset class info modal -->
+<div class="modal-overlay" id="infoModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <div class="modal-dialog" role="document">
+    <div class="modal-head">
+      <div class="modal-icon" id="modalIcon">P</div>
+      <div class="modal-head-text">
+        <h2 class="modal-title" id="modalTitle">Asset class</h2>
+        <div class="modal-subtitle" id="modalSubtitle"></div>
+      </div>
+      <button class="modal-close" id="modalCloseBtn" aria-label="Close">✕</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast">Step 3 isn't built yet — coming next iteration.</div>
+
+<script>
+  // ============ Asset class config ============
+  const ASSETS = [
+    {
+      id: 'private',
+      name: 'Private Markets',
+      sub: 'via ARTA — private credit, private equity, private real estate, private infrastructure',
+      color: '#2D6A4F',
+      icon: 'P',
+      defaultPct: 20,
+      defaultGross: 8.5,
+      defaultFees: 1.5,
+      note: 'Monthly / quarterly income · quarterly liquidity'
+    },
+    {
+      id: 'structured',
+      name: 'Structured Notes',
+      sub: '3–12 month maturity, monthly coupon income (FCN-style)',
+      color: '#B8860B',
+      icon: 'S',
+      defaultPct: 25,
+      defaultGross: 12.0,
+      defaultFees: 0.0,
+      note: 'Various issuers, rolled at maturity'
+    },
+    {
+      id: 'capprotected',
+      name: 'Capital Protected Funds',
+      sub: 'Multi-fund mix — Allianz Income & Growth, Fullerton Asia, Schroder Gold, Allianz AI, Amova Japan',
+      color: '#40916C',
+      icon: 'C',
+      defaultPct: 35,
+      defaultGross: 10.0,
+      defaultFees: 2.5,
+      note: 'Deployed over 5 years · diversified across five unit-trust funds with capital protection'
+    },
+    {
+      id: 'indexannuity',
+      name: 'Index Income Annuity',
+      sub: 'Singlife Indexed Income',
+      color: '#A87544',
+      icon: 'I',
+      defaultPct: 20,
+      defaultGross: 5.0,
+      defaultFees: 0.0,
+      note: 'Pay single / 5 / 10 yrs · paid year 2 → age 120 · capital guaranteed on death'
+    },
+  ];
+
+  // ============ Asset class explainer content ============
+  const INFO = {
+    private: {
+      tags: ['Private credit', 'Private equity', 'Private real estate', 'Private infrastructure', 'Private hedge funds'],
+      sections: [
+        {
+          h: 'What it is',
+          p: [
+            '"Private markets" means investments where the underlying — a company, property, infrastructure asset, hedge-fund strategy, or loan — is <strong>not listed on a public stock exchange</strong>. Historically reserved for institutional investors with very high minimums.',
+            'The <strong>ARTA</strong> platform fractionalises access so individual investors can build a diversified private-markets sleeve across credit, equity, real estate, infrastructure, and hedge-fund strategies.'
+          ]
+        },
+        {
+          h: 'Sub-strategies',
+          list: [
+            '<strong>Private Credit</strong> — direct lending to private companies, typically senior secured loans paying high single-digit yields',
+            '<strong>Private Equity</strong> — equity ownership in private companies, accessed through buyout or growth funds',
+            '<strong>Private Real Estate</strong> — direct ownership of income-producing property (logistics, residential, offices)',
+            '<strong>Private Infrastructure</strong> — long-duration assets like toll roads, renewable energy, telecoms with contracted cashflows',
+            '<strong>Private Hedge Funds</strong> — multi-strategy hedge-fund exposure (long/short equity, macro, event-driven, relative value) with low correlation to traditional markets'
+          ]
+        },
+        {
+          h: 'How it works',
+          list: [
+            'Capital is committed via ARTA across one or more sub-strategies',
+            'Income from credit and real estate is distributed <strong>monthly or quarterly</strong>',
+            'Liquidity is offered <strong>quarterly</strong> (subject to fund-level gates and notice periods)',
+            'Returns are a mix of yield (income) and capital appreciation (equity, real estate)'
+          ]
+        },
+        {
+          h: 'Role in the portfolio',
+          p: [
+            'Diversification away from listed equities and bonds, with a yield premium for accepting reduced liquidity. Often shows lower correlation to public-market drawdowns.'
+          ]
+        },
+        {
+          h: 'Risks to know',
+          list: [
+            '<strong>Illiquidity</strong> — capital is locked for longer windows than listed funds',
+            '<strong>Credit risk</strong> in private credit (borrower defaults)',
+            '<strong>Valuation lag</strong> — NAVs are updated quarterly, so reported prices smooth real volatility',
+            'Fund-level fees can be elevated vs ETFs; net-of-fees returns matter'
+          ]
+        }
+      ],
+      factsheets: [
+        { name: 'Golub Capital BDC — Factsheet (Jan 2026)', path: 'Asset classes/Private Markets/gcred.intl_assets_GCRED.INTL_Factsheet_Jan_2026.pdf' },
+        { name: 'Golub Capital BDC — Investor Presentation (Jan 2026)', path: 'Asset classes/Private Markets/gcred.intl_assets_GCRED.INTL_Presentation_Jan_2026.pdf' },
+        { name: 'Carlyle Tactical Credit — Factsheet (Feb 2026)', path: 'Asset classes/Private Markets/ctac.intl_assets_CTAC.INTL_Factsheet_Feb_2026.pdf' },
+        { name: 'Carlyle Tactical Credit — Investor Presentation (Feb 2026)', path: 'Asset classes/Private Markets/ctac.intl_assets_CTAC.INTL_Presentation_Feb_2026.pdf' },
+        { name: 'iCapital Diversified Hedge Fund — Factsheet (Jan 2026)', path: 'Asset classes/Private Markets/idhf.intl_assets_iDHF.INTL_Fact_Sheet-2026-01-31.pdf' },
+        { name: 'iCapital Diversified Hedge Fund — Investor Presentation (Mar 2026)', path: 'Asset classes/Private Markets/idhf.intl_assets_iDHF.INTL_Presentation-2026-03-31.pdf' },
+        { name: 'Nuveen Offshore — Factsheet (Jan 2026)', path: 'Asset classes/Private Markets/nven.intl_assets_Nuveen_Offshore_202601_Factsheet.pdf' },
+        { name: 'Nuveen Offshore — Monthly Performance (Feb 2026)', path: 'Asset classes/Private Markets/nven.intl_assets_Nuveen_Offshore_202602_Monthly_Performance_Update.pdf' },
+        { name: 'iDirect International (Warburg KKR) — Factsheet (Q3 2025)', path: 'Asset classes/Private Markets/warkv.intl_assets_iDirect_International_Fact_Sheet_Q3_2025.pdf' },
+        { name: 'iDirect International (Warburg KKR) — Investor Presentation (Q3 2025)', path: 'Asset classes/Private Markets/warkv.intl_assets_iDirect_International_Investor_Presentation_Q3_2025.pdf' }
+      ]
+    },
+
+    structured: {
+      tags: ['FCN', 'Fixed Coupon Note', 'Equity-linked', '3–12m maturity'],
+      sections: [
+        {
+          h: 'What it is',
+          p: [
+            'A <strong>structured note</strong> is a debt obligation issued by a major bank where the coupon and principal repayment are tied to the performance of an underlying — typically a basket of stocks or an index.',
+            'The most common form in this portfolio is the <strong>Fixed Coupon Note (FCN)</strong>, which pays a high fixed coupon as long as the underlying equities stay above a defined level.'
+          ]
+        },
+        {
+          h: 'How it works (FCN example)',
+          list: [
+            'You buy the note for a fixed term — typically <strong>3 to 12 months</strong>',
+            'It pays a <strong>fixed monthly coupon</strong> (often 10–15% annualised) for as long as the underlying stays above the <em>knock-in</em> barrier (often 60–70% of starting price)',
+            'At maturity: if all underlyings are above their knock-out barriers, you receive <strong>full capital back plus the final coupon</strong>',
+            'If the worst underlying is below knock-in at maturity, you receive <strong>shares of the worst performer</strong> at the strike price — capital may be impaired',
+            'Notes are typically <strong>rolled at maturity</strong> into new issues to maintain the income stream'
+          ]
+        },
+        {
+          h: 'Role in the portfolio',
+          p: [
+            'A high-coupon enhanced-yield bucket. Generates strong income in flat, sideways, or modestly rising markets where direct equity ownership might give little. Acts as a complement to traditional fixed income.'
+          ]
+        },
+        {
+          h: 'Risks to know',
+          list: [
+            '<strong>Equity market risk</strong> — if the worst underlying drops below knock-in by maturity, capital is at risk',
+            '<strong>Issuer credit risk</strong> — the note is unsecured debt of the issuing bank; if the bank fails, recovery is uncertain',
+            '<strong>Path-dependent payoff</strong> — your return is not the same as holding the underlying directly',
+            '<strong>Reinvestment risk</strong> — if the note knocks out early, you must redeploy into a new note at then-current rates'
+          ]
+        }
+      ],
+      factsheets: []
+    },
+
+    capprotected: {
+      tags: ['Multi-fund', 'Diversified', 'Capital protected', '5-year deployment'],
+      sections: [
+        {
+          h: 'What it is',
+          p: [
+            'A diversified portfolio of <strong>five carefully-selected unit trust funds</strong> spanning income, growth, and thematic strategies, structured with a <strong>capital protection feature</strong>.',
+            'Designed for clients who want exposure to professionally-managed funds without compromising on capital safety.'
+          ]
+        },
+        {
+          h: 'Underlying funds',
+          list: [
+            '<strong>Allianz Income and Growth</strong> — multi-asset income fund spanning US equities, convertibles, and high-yield bonds',
+            '<strong>Fullerton Lux Asia Absolute Alpha</strong> — Asian long/short equity strategy targeting absolute returns',
+            '<strong>Schroder ISF Global Gold</strong> (SGD-hedged) — gold-mining equities, an inflation hedge and crisis diversifier',
+            '<strong>Allianz Global Artificial Intelligence</strong> (SGD-hedged) — thematic equity exposure to the AI ecosystem',
+            '<strong>Amova Japan Dividend Equity</strong> — Japanese dividend-paying equities with stable income profile'
+          ]
+        },
+        {
+          h: 'How it works',
+          list: [
+            'Capital is paid as a <strong>single lump sum</strong> or <strong>spread over 5 years</strong> to dollar-cost-average entry',
+            'Capital is allocated across the five funds in a balanced mix',
+            'Income/dividends from the funds can be reinvested or paid out as monthly income',
+            'Capital is protected via the wrapper structure regardless of underlying fund performance',
+            'Holdings can be rebalanced between funds based on outlook'
+          ]
+        },
+        {
+          h: 'Role in the portfolio',
+          list: [
+            'Diversified growth + income across geographies and themes',
+            'Capital safety floor for clients with dependents',
+            'One-decision exposure to a curated multi-fund portfolio'
+          ]
+        },
+        {
+          h: 'Risks to know',
+          list: [
+            '<strong>Surrender penalties</strong> in early years — early exit can lock in losses',
+            '<strong>Underlying fund performance</strong> drives upside — capital protection is the floor, not a guaranteed living return',
+            '<strong>Fee layers</strong> include fund management and structure charges',
+            '<strong>Counterparty risk</strong> — capital protection depends on the issuer\'s ongoing solvency'
+          ]
+        }
+      ],
+      factsheets: [
+        { name: 'Allianz Income and Growth — Factsheet (FSMOne)', path: 'https://secure.fundsupermart.com/fsmone/funds/factsheet/ALZ210/Allianz-Income-and-Growth-Cl-AMi3-DIS-H2-SGD' },
+        { name: 'Fullerton Lux Asia Absolute Alpha — Factsheet (FSMOne)', path: 'https://secure.fundsupermart.com/fsmone/funds/factsheet/FUL046/Fullerton-Lux-Funds-Asia-Absolute-Alpha-A-Acc-SGD' },
+        { name: 'Schroder ISF Global Gold (SGD-H) — Factsheet (FSMOne)', path: 'https://secure.fundsupermart.com/fsmone/funds/factsheet/SCD064/Schroder-ISF-Global-Gold-A-Acc-SGD-H' },
+        { name: 'Allianz Global Artificial Intelligence (SGD-H) — Factsheet (FSMOne)', path: 'https://secure.fundsupermart.com/fsmone/funds/factsheet/ALZ276/Allianz-Global-Artificial-Intelligence-AT-Acc-H2-SGD' },
+        { name: 'Amova Japan Dividend Equity (SGD) — Factsheet (FSMOne)', path: 'https://secure.fundsupermart.com/fsmone/funds/factsheet/DBS021/Amova-Japan-Dividend-Equity-SGD-formerly-Nikko-AM-' }
+      ]
+    },
+
+    indexannuity: {
+      tags: ['Singlife', 'Guaranteed income', 'Income year 2 to age 120', 'Capital guaranteed on death'],
+      sections: [
+        {
+          h: 'What it is',
+          p: [
+            '<strong>Singlife Indexed Income</strong> is an indexed annuity that combines a guaranteed income stream with index-linked upside on the income amount.',
+            'It\'s designed to solve <strong>longevity risk</strong> — the chance you outlive your money — by paying an income for life.'
+          ]
+        },
+        {
+          h: 'How it works',
+          list: [
+            'Capital is paid as a <strong>single payment, over 5 years, or over 10 years</strong>',
+            'From <strong>year 2 onward</strong>, you receive guaranteed monthly or annual income',
+            'Income payments continue until <strong>age 120</strong>',
+            'The income amount can <strong>step up</strong> if the underlying index performs well — you keep the higher amount once locked in',
+            'On death of the insured, beneficiaries receive the <strong>original capital</strong> (less any income already drawn)'
+          ]
+        },
+        {
+          h: 'Role in the portfolio',
+          list: [
+            'Lifetime income certainty — the foundation income layer',
+            'Capital preservation through the guaranteed death benefit',
+            'Bridges the gap between bonds (low return, finite duration) and pure equities (volatile, no income guarantee)'
+          ]
+        },
+        {
+          h: 'Risks to know',
+          list: [
+            '<strong>Opportunity cost</strong> — long-duration capital lockup; can\'t redeploy if better opportunities arise',
+            '<strong>Surrender penalties</strong> in early years if you need to cash out',
+            '<strong>Insurer credit risk</strong> — depends on Singlife\'s solvency over decades',
+            '<strong>Inflation drag</strong> — guaranteed income in nominal dollars; index step-ups help but don\'t fully offset inflation'
+          ]
+        }
+      ],
+      factsheets: [
+        { name: 'Singlife Legacy Indexed Income (2026)', path: 'Asset classes/Index Income Annuity/SinglifeLegacyIndexedIncome2026.pdf' }
+      ]
+    }
+  };
+
+  // ============ State ============
+  const state = {
+    currentStep: 1,
+    clientName: '',
+    currentAge: 50,
+    retireAge: 65,
+    assets: 1000000,
+    incomeNeed: null,
+    legacy: null,
+    inflation: 3.0,    // % per year
+    dependents: 0,
+    allocations: {
+      private:      { pct: 20, gross: 8.5,  fees: 1.5 },
+      structured:   { pct: 25, gross: 12.0, fees: 0.0 },
+      capprotected: { pct: 35, gross: 10.0, fees: 2.5 },
+      indexannuity: { pct: 20, gross: 5.0,  fees: 0.0 },
+      cash:         { gross: 3.0, fees: 0.0 },  // pct is computed
+    },
+    // Step 3 timeline settings — payoutStartAge defaults are filled in once Step 1 is loaded
+    timeline: {
+      private:      { deployYears: 1, payoutStartAge: null },  // null → defaults to current age (pay from year 1)
+      structured:   { deployYears: 1, payoutStartAge: null },
+      capprotected: { deployYears: 5, payoutStartAge: null },  // null → defaults to retirement age
+      indexannuity: { deployYears: 5, payoutStartAge: null },
+      cash:         { deployYears: 1, payoutStartAge: null },  // null → current age (cash always pays out by default)
+    },
+    projectionEndAge: 90,
+  };
+
+  // Buckets in Step 3 timeline ordering (annuity & cap-protected first as they accumulate)
+  const TIMELINE_BUCKETS = ['indexannuity', 'capprotected', 'private', 'structured', 'cash'];
+
+  // Earliest payout age per bucket (offset from current age in years)
+  function minPayoutAge(bucketId) {
+    switch (bucketId) {
+      case 'capprotected': return state.currentAge + 5;  // year 6
+      case 'indexannuity': return state.currentAge + 1;  // year 2
+      default:             return state.currentAge;       // year 1
+    }
+  }
+
+  // Resolve a bucket's effective payoutStartAge (handle null defaults + clamp)
+  function effectivePayoutAge(bucketId) {
+    const tl = state.timeline[bucketId];
+    let age;
+    if (tl.payoutStartAge != null) age = tl.payoutStartAge;
+    else if (bucketId === 'capprotected' || bucketId === 'indexannuity') age = state.retireAge;
+    else age = state.currentAge; // pay from year 1
+    // Clamp to valid range, respecting per-bucket minimum
+    const minAge = minPayoutAge(bucketId);
+    return Math.max(minAge, Math.min(state.projectionEndAge, age));
+  }
+  function bucketColor(id) {
+    const a = ASSETS.find(x => x.id === id);
+    return a ? a.color : '#9CA3AF';
+  }
+  function bucketIcon(id) {
+    const a = ASSETS.find(x => x.id === id);
+    return a ? a.icon : '$';
+  }
+  function bucketName(id) {
+    if (id === 'cash') return 'Cash & MMF';
+    const a = ASSETS.find(x => x.id === id);
+    return a ? a.name : id;
+  }
+
+  // ============ Helpers ============
+  const $ = (id) => document.getElementById(id);
+  const fmt = (n) => 'S$' + Math.round(n).toLocaleString('en-SG');
+  const fmtPlain = (n) => Math.round(n).toLocaleString('en-SG');
+  const parseNum = (str) => {
+    if (typeof str !== 'string') return 0;
+    const cleaned = str.replace(/[^0-9.]/g, '');
+    if (!cleaned) return 0;
+    return Number(cleaned);
+  };
+  const setSliderFill = (slider) => {
+    const min = +slider.min, max = +slider.max, val = +slider.value;
+    const pct = ((val - min) / (max - min)) * 100;
+    slider.style.setProperty('--fill', pct + '%');
+  };
+
+  // ============ Compute plan ============
+  function computePlan() {
+    const a = state.allocations;
+    const allocated = a.private.pct + a.structured.pct + a.capprotected.pct + a.indexannuity.pct;
+    const cashPct = Math.max(0, 100 - allocated);
+    const overAllocated = allocated > 100 + 1e-9;
+
+    const nets = {};
+    const amounts = {};
+    const returns = {};
+    let totalReturn = 0;
+
+    ASSETS.forEach(asset => {
+      const cfg = a[asset.id];
+      const net = cfg.gross - cfg.fees;
+      const amt = state.assets * cfg.pct / 100;
+      const ret = amt * net / 100;
+      nets[asset.id] = net;
+      amounts[asset.id] = amt;
+      returns[asset.id] = ret;
+      totalReturn += ret;
+    });
+    const cashNet = a.cash.gross - a.cash.fees;
+    const cashAmt = state.assets * cashPct / 100;
+    const cashRet = cashAmt * cashNet / 100;
+    nets.cash = cashNet;
+    amounts.cash = cashAmt;
+    returns.cash = cashRet;
+    totalReturn += cashRet;
+
+    const blendedNet = state.assets > 0 ? (totalReturn / state.assets) * 100 : 0;
+
+    return {
+      allocated, cashPct, overAllocated,
+      nets, amounts, returns,
+      totalReturn, blendedNet,
+    };
+  }
+
+  // ============ Compute timeline ============
+  function computeTimeline() {
+    const startAge = state.currentAge;
+    const endAge = state.projectionEndAge;
+    const N = endAge - startAge + 1;
+    if (N <= 0) return [];
+
+    // Per-bucket year-by-year arrays
+    const buckets = {};
+    ASSETS.forEach(asset => {
+      const cfg = state.allocations[asset.id];
+      const tl = state.timeline[asset.id];
+      const totalAlloc = state.assets * cfg.pct / 100;
+      const deployYears = Math.max(1, tl.deployYears);
+      const deployPerYear = totalAlloc / deployYears;
+      const netROI = (cfg.gross - cfg.fees) / 100;
+      const payoutAge = effectivePayoutAge(asset.id);
+
+      let value = 0;
+      let cumWithdrawn = 0;
+      const yearly = [];
+      for (let i = 0; i < N; i++) {
+        const age = startAge + i;
+        const deployed = (i < deployYears) ? deployPerYear : 0;
+        value += deployed;
+
+        let cashflow = 0;
+        if (age < payoutAge) {
+          // Accumulating: compound at net ROI (after deployments are added)
+          value = value * (1 + netROI);
+        } else {
+          // Paying out: freeze, generate cashflow
+          cashflow = value * netROI;
+        }
+        cumWithdrawn += cashflow;
+        yearly.push({ age, value, cashflow, cumWithdrawn });
+      }
+      buckets[asset.id] = yearly;
+    });
+
+    // Cash bucket: residual undeployed capital
+    const cashCfg = state.allocations.cash;
+    const cashNet = (cashCfg.gross - cashCfg.fees) / 100;
+    const cashPayoutAge = effectivePayoutAge('cash');
+    let cashCum = 0;
+    const cashYearly = [];
+    for (let i = 0; i < N; i++) {
+      const age = startAge + i;
+      // Sum of deployed-so-far across all asset buckets
+      let totalDeployed = 0;
+      ASSETS.forEach(asset => {
+        const cfg = state.allocations[asset.id];
+        const tl = state.timeline[asset.id];
+        const totalAlloc = state.assets * cfg.pct / 100;
+        const deployYears = Math.max(1, tl.deployYears);
+        const deployPerYear = totalAlloc / deployYears;
+        const deployedSoFar = Math.min(i + 1, deployYears) * deployPerYear;
+        totalDeployed += deployedSoFar;
+      });
+      const cashValue = Math.max(0, state.assets - totalDeployed);
+      const cashflow = (age >= cashPayoutAge) ? cashValue * cashNet : 0;
+      cashCum += cashflow;
+      cashYearly.push({ age, value: cashValue, cashflow, cumWithdrawn: cashCum });
+    }
+    buckets.cash = cashYearly;
+
+    // Aggregate per-year totals
+    const totals = [];
+    for (let i = 0; i < N; i++) {
+      const age = startAge + i;
+      const byBucket = {};
+      let totalValue = 0;
+      let totalCashflow = 0;
+      let totalCum = 0;
+      Object.keys(buckets).forEach(id => {
+        const bd = buckets[id][i];
+        byBucket[id] = bd;
+        totalValue += bd.value;
+        totalCashflow += bd.cashflow;
+        totalCum += bd.cumWithdrawn;
+      });
+      totals.push({
+        age, year: i + 1,
+        buckets: byBucket,
+        totalValue,
+        totalCashflow,
+        cumWithdrawn: totalCum,
+        totalReturns: totalValue + totalCum,
+      });
+    }
+    return totals;
+  }
+
+  // ============ Build Step 3 timeline cards ============
+  function renderTimelineCards() {
+    const root = $('timelineGrid');
+    const maxAge = state.projectionEndAge;
+    root.innerHTML = TIMELINE_BUCKETS.map(id => {
+      const isCash = id === 'cash';
+      const payoutAge = effectivePayoutAge(id);
+      const reinvestYrs = Math.max(0, payoutAge - state.currentAge);
+      const isReinvesting = payoutAge > state.currentAge;
+      const minAge = minPayoutAge(id);
+      const earliestNote = (minAge > state.currentAge)
+        ? `<span style="font-size: 11px; color: var(--text-subtle); font-weight: 500;"> &middot; earliest age ${minAge}</span>`
+        : '';
+      return `
+        <div class="timeline-card" data-bucket="${id}">
+          <div class="timeline-card-head">
+            <div class="timeline-icon" style="background:${bucketColor(id)}">${bucketIcon(id)}</div>
+            <div class="timeline-name">${bucketName(id)}</div>
+            <div class="timeline-mode ${isReinvesting ? 'reinvest' : 'payout'}" id="mode-${id}">
+              ${isReinvesting ? 'Reinvesting' : 'Paying out'}
+            </div>
+          </div>
+          <div>
+            <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Income starts at age${earliestNote}</div>
+            <div class="timeline-controls">
+              <input type="range" class="slider timeline-slider"
+                     id="payout-${id}"
+                     min="${minAge}" max="${maxAge}" step="1"
+                     value="${payoutAge}" />
+              <div class="timeline-slider-val" id="payoutval-${id}">${payoutAge}</div>
+            </div>
+          </div>
+          <div class="timeline-summary" id="summary-${id}"></div>
+        </div>
+      `;
+    }).join('');
+
+    TIMELINE_BUCKETS.forEach(id => {
+      const slider = $('payout-' + id);
+      slider.addEventListener('input', (e) => {
+        const v = +e.target.value;
+        state.timeline[id].payoutStartAge = v;
+        $('payoutval-' + id).textContent = v;
+        setSliderFill(slider);
+        render();
+      });
+      setSliderFill(slider);
+    });
+  }
+
+  // Update timeline card summaries (called inside render)
+  function updateTimelineSummaries() {
+    TIMELINE_BUCKETS.forEach(id => {
+      const cfg = id === 'cash' ? state.allocations.cash : state.allocations[id];
+      const netROI = (cfg.gross - cfg.fees);
+      const payoutAge = effectivePayoutAge(id);
+      const reinvestYrs = Math.max(0, payoutAge - state.currentAge);
+      const isReinvesting = payoutAge > state.currentAge;
+
+      // Sync slider bounds and value with current state (per-bucket min)
+      const slider = $('payout-' + id);
+      if (slider) {
+        const minAge = minPayoutAge(id);
+        if (+slider.min !== minAge) slider.min = minAge;
+        if (+slider.max !== state.projectionEndAge) slider.max = state.projectionEndAge;
+        if (+slider.value !== payoutAge) {
+          slider.value = payoutAge;
+          const valEl = $('payoutval-' + id);
+          if (valEl) valEl.textContent = payoutAge;
+        }
+        setSliderFill(slider);
+      }
+
+      const modeEl = $('mode-' + id);
+      if (modeEl) {
+        modeEl.textContent = (state.currentAge >= payoutAge) ? 'Paying out' : 'Reinvest then payout';
+        modeEl.className = 'timeline-mode ' + ((state.currentAge >= payoutAge) ? 'payout' : 'reinvest');
+      }
+
+      const summary = $('summary-' + id);
+      if (!summary) return;
+      const tl = state.timeline[id];
+      const deploy = tl.deployYears > 1 ? `Deployed over <strong>${tl.deployYears} years</strong>. ` : '';
+      let body;
+      if (reinvestYrs > 0) {
+        body = `${deploy}Reinvest for <strong>${reinvestYrs} year${reinvestYrs === 1 ? '' : 's'}</strong> at <strong>${netROI.toFixed(1)}%</strong> net, then start paying income at age <strong>${payoutAge}</strong>.`;
+      } else {
+        body = `${deploy}Paying out income at <strong>${netROI.toFixed(1)}%</strong> net from year 1.`;
+      }
+      summary.innerHTML = body;
+    });
+  }
+
+  // ============ Render projection chart ============
+  function shortFmt(n) {
+    n = Math.round(n);
+    if (Math.abs(n) >= 1_000_000) return 'S$' + (n / 1_000_000).toFixed(n >= 10_000_000 ? 0 : 1) + 'M';
+    if (Math.abs(n) >= 1_000) return 'S$' + (n / 1_000).toFixed(0) + 'K';
+    return 'S$' + n;
+  }
+  function roundUpNice(n) {
+    if (n <= 0) return 1;
+    const exp = Math.pow(10, Math.floor(Math.log10(n)));
+    const f = n / exp;
+    let mult;
+    if (f <= 1) mult = 1;
+    else if (f <= 2) mult = 2;
+    else if (f <= 2.5) mult = 2.5;
+    else if (f <= 5) mult = 5;
+    else mult = 10;
+    return mult * exp;
+  }
+
+  function renderProjectionChart(timeline, container) {
+    const wrap = container || $('chartWrap');
+    if (!timeline.length) { wrap.innerHTML = ''; return; }
+
+    const W = 720, H = 400;
+    const PAD = { l: 84, r: 24, t: 28, b: 56 };
+    const innerW = W - PAD.l - PAD.r;
+    const innerH = H - PAD.t - PAD.b;
+
+    const minAge = timeline[0].age;
+    const maxAge = timeline[timeline.length - 1].age;
+    let yMax = 0;
+    timeline.forEach(d => {
+      yMax = Math.max(yMax, d.totalValue + d.cumWithdrawn);
+    });
+    yMax = Math.max(yMax, state.assets * 1.05);
+    yMax = roundUpNice(yMax * 1.05);
+
+    const xScale = (age) => PAD.l + ((age - minAge) / Math.max(1, (maxAge - minAge))) * innerW;
+    const yScale = (val) => PAD.t + innerH - (val / yMax) * innerH;
+
+    // Stack order (bottom to top)
+    const stackOrder = ['indexannuity', 'capprotected', 'private', 'structured', 'cash'];
+
+    // Build stacked layers
+    let lower = new Array(timeline.length).fill(0);
+    const layers = stackOrder.map(id => {
+      const upper = timeline.map((d, i) => lower[i] + d.buckets[id].value);
+      let path = '';
+      timeline.forEach((d, i) => {
+        path += (i === 0 ? 'M' : 'L') + xScale(d.age).toFixed(1) + ',' + yScale(upper[i]).toFixed(1) + ' ';
+      });
+      for (let i = timeline.length - 1; i >= 0; i--) {
+        path += 'L' + xScale(timeline[i].age).toFixed(1) + ',' + yScale(lower[i]).toFixed(1) + ' ';
+      }
+      path += 'Z';
+      const out = { id, color: bucketColor(id), path };
+      lower = upper;
+      return out;
+    });
+
+    // Cumulative income line
+    let incomePath = '';
+    timeline.forEach((d, i) => {
+      incomePath += (i === 0 ? 'M' : 'L') + xScale(d.age).toFixed(1) + ',' + yScale(d.cumWithdrawn).toFixed(1) + ' ';
+    });
+
+    // Total wealth line (assets + cumulative)
+    let wealthPath = '';
+    timeline.forEach((d, i) => {
+      wealthPath += (i === 0 ? 'M' : 'L') + xScale(d.age).toFixed(1) + ',' + yScale(d.totalValue + d.cumWithdrawn).toFixed(1) + ' ';
+    });
+
+    // Y gridlines + labels
+    const ySteps = 5;
+    let ygrid = '';
+    for (let i = 0; i <= ySteps; i++) {
+      const v = (yMax / ySteps) * i;
+      const y = yScale(v);
+      ygrid += `<line x1="${PAD.l}" y1="${y}" x2="${PAD.l + innerW}" y2="${y}" stroke="rgba(0,0,0,0.06)" />`;
+      ygrid += `<text x="${PAD.l - 8}" y="${y + 4}" text-anchor="end" font-size="11" fill="#6B7280">${shortFmt(v)}</text>`;
+    }
+
+    // X axis labels (every 5 years)
+    let xlabels = '';
+    for (let age = Math.ceil(minAge / 5) * 5; age <= maxAge; age += 5) {
+      const x = xScale(age);
+      xlabels += `<line x1="${x}" y1="${PAD.t + innerH}" x2="${x}" y2="${PAD.t + innerH + 4}" stroke="#9CA3AF" />`;
+      xlabels += `<text x="${x}" y="${PAD.t + innerH + 18}" text-anchor="middle" font-size="11" fill="#6B7280">${age}</text>`;
+    }
+    xlabels += `<text x="${PAD.l + innerW / 2}" y="${PAD.t + innerH + 42}" text-anchor="middle" font-size="11" fill="#9CA3AF" font-weight="600">AGE</text>`;
+
+    // Retirement marker
+    let retMarker = '';
+    if (state.retireAge >= minAge && state.retireAge <= maxAge) {
+      const rx = xScale(state.retireAge);
+      retMarker += `<line x1="${rx}" y1="${PAD.t}" x2="${rx}" y2="${PAD.t + innerH}" stroke="#1B4332" stroke-dasharray="4,3" stroke-width="1.5" opacity="0.6" />`;
+      retMarker += `<text x="${rx}" y="${PAD.t - 8}" text-anchor="middle" font-size="11" fill="#1B4332" font-weight="700">Retirement (age ${state.retireAge})</text>`;
+    }
+
+    // Income target line (escalated). Show as horizontal at retirement-year value.
+    let goalMarker = '';
+    if (state.incomeNeed) {
+      const horizon = Math.max(0, state.retireAge - state.currentAge);
+      const escFactor = Math.pow(1 + state.inflation / 100, horizon);
+      const tgt = state.incomeNeed * escFactor;
+      // We compare TARGET to ANNUAL CASHFLOW, not cumulative — but the chart axis is total $.
+      // Better: not draw on this chart; show in milestones instead. Skip for now.
+    }
+
+    wrap.innerHTML = `
+      <svg class="chart-svg" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Wealth projection">
+        ${ygrid}
+        ${layers.map(l => `<path d="${l.path}" fill="${l.color}" opacity="0.85" />`).join('')}
+        ${retMarker}
+        <path d="${wealthPath}" fill="none" stroke="#1A1A1A" stroke-width="2" stroke-dasharray="5,3" />
+        <path d="${incomePath}" fill="none" stroke="#7A5800" stroke-width="2.5" />
+        <line x1="${PAD.l}" y1="${PAD.t + innerH}" x2="${PAD.l + innerW}" y2="${PAD.t + innerH}" stroke="#9CA3AF" />
+        <line x1="${PAD.l}" y1="${PAD.t}" x2="${PAD.l}" y2="${PAD.t + innerH}" stroke="#9CA3AF" />
+        ${xlabels}
+      </svg>
+    `;
+  }
+
+  // ============ Milestones ============
+  function renderMilestones(timeline, container, opts) {
+    const root = container || $('milestoneGrid');
+    if (!timeline.length) { root.innerHTML = ''; return; }
+    const printMode = !!(opts && opts.printMode);
+    const startAge = state.currentAge;
+    const retAge = state.retireAge;
+    const endAge = state.projectionEndAge;
+
+    const milestones = [];
+    milestones.push({ age: retAge, label: 'At retirement' });
+    milestones.push({ age: Math.min(endAge, retAge + 5), label: '5 years after retirement' });
+    milestones.push({ age: Math.min(endAge, retAge + 15), label: '15 years after retirement' });
+    milestones.push({ age: endAge, label: `End of plan (age ${endAge})` });
+
+    // Income & legacy targets (escalated)
+    const horizon = Math.max(0, retAge - startAge);
+    const escFactor = Math.pow(1 + state.inflation / 100, horizon);
+    const incomeTgt = state.incomeNeed ? state.incomeNeed * escFactor : null;
+    const legacyTgt = state.legacy ? state.legacy * escFactor : null;
+
+    root.innerHTML = milestones.map(m => {
+      const idx = m.age - startAge;
+      if (idx < 0 || idx >= timeline.length) return '';
+      const d = timeline[idx];
+      const annualCashflow = d.totalCashflow;
+      const isRet = m.age === retAge;
+
+      // Goal comparisons
+      let goals = '';
+      if (incomeTgt && m.age >= retAge) {
+        const ratio = incomeTgt > 0 ? (annualCashflow / incomeTgt) : 0;
+        const cls = ratio >= 1 ? 'goal-pass' : (ratio >= 0.8 ? 'goal-near' : 'goal-fail');
+        const sym = ratio >= 1 ? '✓' : (ratio >= 0.8 ? '~' : '✗');
+        goals += `<div class="goal-line"><span>vs income target</span><span class="${cls}">${sym} ${Math.round(ratio * 100)}%</span></div>`;
+      }
+      if (legacyTgt && m.age === endAge) {
+        const ratio = legacyTgt > 0 ? (d.totalValue / legacyTgt) : 0;
+        const cls = ratio >= 1 ? 'goal-pass' : (ratio >= 0.8 ? 'goal-near' : 'goal-fail');
+        const sym = ratio >= 1 ? '✓' : (ratio >= 0.8 ? '~' : '✗');
+        goals += `<div class="goal-line"><span>vs legacy target</span><span class="${cls}">${sym} ${Math.round(ratio * 100)}%</span></div>`;
+      }
+
+      if (printMode) {
+        return `
+          <div class="pr-milestone${isRet ? ' highlight' : ''}">
+            <div class="pr-milestone-age">Age ${m.age}</div>
+            <div class="pr-milestone-when">${m.label}</div>
+            <div class="pr-milestone-row"><span>Assets</span><span>${shortFmt(d.totalValue)}</span></div>
+            <div class="pr-milestone-row"><span>Annual income</span><span>${shortFmt(annualCashflow)}</span></div>
+            <div class="pr-milestone-row"><span>Cumulative income</span><span>${shortFmt(d.cumWithdrawn)}</span></div>
+            ${goals ? `<div style="margin-top:5pt; padding-top:4pt; border-top:1px dashed var(--border); font-size:8.5pt;">${goals}</div>` : ''}
+          </div>
+        `;
+      }
+
+      return `
+        <div class="milestone${isRet ? ' highlight' : ''}">
+          <div class="milestone-age">Age ${m.age}</div>
+          <div class="milestone-when">${m.label}</div>
+          <div class="milestone-stat-label">Total assets</div>
+          <div class="milestone-stat-value">${shortFmt(d.totalValue)}</div>
+          <div class="milestone-stat-label">Annual income</div>
+          <div class="milestone-stat-value">${shortFmt(annualCashflow)}</div>
+          <div class="milestone-stat-label">Cumulative income</div>
+          <div class="milestone-stat-value">${shortFmt(d.cumWithdrawn)}</div>
+          ${goals ? `<div class="milestone-goals">${goals}</div>` : ''}
+        </div>
+      `;
+    }).join('');
+  }
+
+  // ============ Print summary report ============
+  function preparePrintReport() {
+    const plan = computePlan();
+    const timeline = computeTimeline();
+    const today = new Date();
+    const dateStr = today.toLocaleDateString('en-SG', { year: 'numeric', month: 'long', day: 'numeric' });
+
+    // Header date + footer date
+    $('prDate').textContent = dateStr;
+    $('prFooterDate').textContent = dateStr;
+
+    // Title with client name
+    const clientLabel = state.clientName.trim() || 'Wealth Portfolio Summary';
+    $('prTitle').textContent = clientLabel;
+    $('prSubtitle').textContent = state.clientName.trim()
+      ? 'Personalised wealth plan prepared by FIN'
+      : 'Personalised wealth plan';
+
+    // Profile grid
+    const horizon = Math.max(0, state.retireAge - state.currentAge);
+    $('prCurAge').textContent = state.currentAge;
+    $('prRetAge').textContent = state.retireAge;
+    $('prHorizon').textContent = horizon === 1 ? '1 year' : horizon + ' years';
+    $('prDeps').textContent = state.dependents;
+    $('prInfl').textContent = state.inflation.toFixed(1) + '% / yr';
+    $('prAssetsAmt').textContent = fmt(state.assets);
+
+    // Targets (income & legacy) — show today's $ + escalated
+    const inflFactor = Math.pow(1 + state.inflation / 100, horizon);
+    let targetsHTML = '';
+    if (state.incomeNeed) {
+      targetsHTML += `<div class="pr-target">
+        <label>Income target at retirement</label>
+        <span>${fmt(state.incomeNeed * inflFactor)} / year</span>
+        <div class="pr-target-sub">${fmt(state.incomeNeed)} today &middot; escalated ${state.inflation.toFixed(1)}% &times; ${horizon} yrs</div>
+      </div>`;
+    }
+    if (state.legacy) {
+      targetsHTML += `<div class="pr-target">
+        <label>Legacy target at retirement</label>
+        <span>${fmt(state.legacy * inflFactor)}</span>
+        <div class="pr-target-sub">${fmt(state.legacy)} today &middot; escalated ${state.inflation.toFixed(1)}% &times; ${horizon} yrs</div>
+      </div>`;
+    }
+    $('prTargets').innerHTML = targetsHTML;
+
+    // Allocation bar
+    let segs = '';
+    ASSETS.forEach(asset => {
+      const cfg = state.allocations[asset.id];
+      if (cfg.pct > 0) {
+        segs += `<div class="pr-allocbar-seg" style="background:${asset.color}; width:${(cfg.pct).toFixed(1)}%"></div>`;
+      }
+    });
+    if (plan.cashPct > 0) {
+      segs += `<div class="pr-allocbar-seg cash" style="width:${plan.cashPct.toFixed(1)}%"></div>`;
+    }
+    $('prAllocBar').innerHTML = segs;
+
+    // Allocation table
+    let allocRows = '';
+    ASSETS.forEach(asset => {
+      const cfg = state.allocations[asset.id];
+      const net = plan.nets[asset.id];
+      const amt = plan.amounts[asset.id];
+      const ret = plan.returns[asset.id];
+      allocRows += `<tr>
+        <td><div class="pr-asset-cell"><span class="pr-asset-dot" style="background:${asset.color}"></span>${asset.name}</div></td>
+        <td class="num">${cfg.pct.toFixed(1)}%</td>
+        <td class="num">${fmt(amt)}</td>
+        <td class="num">${net.toFixed(2)}%</td>
+        <td class="num">${fmt(ret)} / yr</td>
+      </tr>`;
+    });
+    // Cash row
+    allocRows += `<tr>
+      <td><div class="pr-asset-cell"><span class="pr-asset-dot cash"></span>Cash &amp; MMF (residual)</div></td>
+      <td class="num">${plan.cashPct.toFixed(1)}%</td>
+      <td class="num">${fmt(plan.amounts.cash)}</td>
+      <td class="num">${plan.nets.cash.toFixed(2)}%</td>
+      <td class="num">${fmt(plan.returns.cash)} / yr</td>
+    </tr>`;
+    // Total row
+    allocRows += `<tr style="border-top:1.5px solid var(--primary);">
+      <td><strong>Total</strong></td>
+      <td class="num"><strong>${(plan.allocated + plan.cashPct).toFixed(1)}%</strong></td>
+      <td class="num"><strong>${fmt(state.assets)}</strong></td>
+      <td class="num"><strong>${plan.blendedNet.toFixed(2)}%</strong></td>
+      <td class="num"><strong>${fmt(plan.totalReturn)} / yr</strong></td>
+    </tr>`;
+    $('prAllocTable').innerHTML = allocRows;
+
+    // Payout schedule table
+    let schedRows = '';
+    TIMELINE_BUCKETS.forEach(id => {
+      const payoutAge = effectivePayoutAge(id);
+      const reinvestYrs = Math.max(0, payoutAge - state.currentAge);
+      const isReinvesting = payoutAge > state.currentAge;
+      const color = bucketColor(id);
+      const dotCls = id === 'cash' ? 'pr-asset-dot cash' : 'pr-asset-dot';
+      const dotStyle = id === 'cash' ? '' : `style="background:${color}"`;
+      schedRows += `<tr>
+        <td><div class="pr-asset-cell"><span class="${dotCls}" ${dotStyle}></span>${bucketName(id)}</div></td>
+        <td class="num">Age ${payoutAge}</td>
+        <td class="num">${reinvestYrs} yr${reinvestYrs === 1 ? '' : 's'}</td>
+        <td>${isReinvesting ? 'Reinvest (compound)' : 'Pay out income'}</td>
+      </tr>`;
+    });
+    $('prScheduleTable').innerHTML = schedRows;
+
+    // Chart — render into print container
+    $('prEndAge').textContent = state.projectionEndAge;
+    renderProjectionChart(timeline, $('prChart'));
+
+    // Milestones — render into print container
+    renderMilestones(timeline, $('prMilestones'), { printMode: true });
+  }
+
+  function printSummary() {
+    preparePrintReport();
+    // Set document.title so the browser's "Save as PDF" dialog
+    // defaults to "Wealth Portfolio {Client Name}".
+    const originalTitle = document.title;
+    const clientName = state.clientName.trim();
+    document.title = clientName
+      ? 'Wealth Portfolio ' + clientName
+      : 'Wealth Portfolio';
+
+    const restore = () => {
+      document.title = originalTitle;
+      window.removeEventListener('afterprint', restore);
+    };
+    window.addEventListener('afterprint', restore);
+
+    // Small delay to ensure layout settles before triggering print
+    setTimeout(() => {
+      window.print();
+      // Safari fires afterprint inconsistently — fall back to a delayed restore
+      setTimeout(() => {
+        if (document.title !== originalTitle) document.title = originalTitle;
+      }, 1500);
+    }, 50);
+  }
+
+  // ============ Build Step 2 cards ============
+  function buildAssetCards() {
+    const root = $('assetCards');
+    root.innerHTML = ASSETS.map(asset => `
+      <div class="asset-card" data-asset="${asset.id}">
+        <div class="asset-head">
+          <div class="asset-icon" style="background:${asset.color}">${asset.icon}</div>
+          <div class="asset-meta">
+            <div class="asset-name">${asset.name}</div>
+            <div class="asset-sub">${asset.sub}</div>
+            <button class="asset-learn" data-info="${asset.id}" type="button">Learn more about this asset class </button>
+          </div>
+          <div class="asset-amount">
+            <div class="asset-amount-val" id="amount-${asset.id}">S$0</div>
+            <div class="asset-amount-meta" id="amountmeta-${asset.id}">0% of portfolio</div>
+          </div>
+        </div>
+        <div class="asset-slider-row">
+          <input type="range" class="slider" id="alloc-${asset.id}" min="0" max="100" step="0.5" value="${asset.defaultPct}" />
+          <div class="asset-slider-val" id="pct-${asset.id}">${asset.defaultPct.toFixed(1)}%</div>
+        </div>
+        <div class="asset-assumptions">
+          <div class="asset-assumption">
+            <div class="asset-assumption-label">Gross ROI</div>
+            <div class="asset-assumption-input">
+              <input type="number" id="gross-${asset.id}" class="mini-input" value="${asset.defaultGross}" step="0.1" min="0" max="50" />
+              <span class="mini-suffix">%</span>
+            </div>
+          </div>
+          <div class="asset-assumption">
+            <div class="asset-assumption-label">Fees</div>
+            <div class="asset-assumption-input">
+              <input type="number" id="fees-${asset.id}" class="mini-input" value="${asset.defaultFees}" step="0.1" min="0" max="10" />
+              <span class="mini-suffix">%</span>
+            </div>
+          </div>
+          <div class="asset-assumption">
+            <div class="asset-assumption-label">Net ROI</div>
+            <div class="mini-readout" id="net-${asset.id}">—</div>
+          </div>
+          <div class="asset-assumption">
+            <div class="asset-assumption-label">Annual return</div>
+            <div class="mini-readout big" id="ret-${asset.id}">—</div>
+          </div>
+        </div>
+        <div class="asset-note">${asset.note}</div>
+      </div>
+    `).join('');
+
+    // Wire each asset's inputs
+    ASSETS.forEach(asset => {
+      const slider = $('alloc-' + asset.id);
+      slider.addEventListener('input', (e) => {
+        state.allocations[asset.id].pct = +e.target.value;
+        setSliderFill(slider);
+        render();
+      });
+      $('gross-' + asset.id).addEventListener('input', (e) => {
+        const v = parseFloat(e.target.value);
+        state.allocations[asset.id].gross = isNaN(v) ? 0 : v;
+        render();
+      });
+      $('fees-' + asset.id).addEventListener('input', (e) => {
+        const v = parseFloat(e.target.value);
+        state.allocations[asset.id].fees = isNaN(v) ? 0 : v;
+        render();
+      });
+      setSliderFill(slider);
+    });
+
+    // Cash yield input
+    $('gross-cash').addEventListener('input', (e) => {
+      const v = parseFloat(e.target.value);
+      state.allocations.cash.gross = isNaN(v) ? 0 : v;
+      render();
+    });
+
+    // Learn-more buttons
+    document.querySelectorAll('.asset-learn').forEach(btn => {
+      btn.addEventListener('click', () => openInfoModal(btn.dataset.info));
+    });
+  }
+
+  // ============ Info modal ============
+  function openInfoModal(assetId) {
+    const asset = ASSETS.find(a => a.id === assetId);
+    const info = INFO[assetId];
+    if (!asset || !info) return;
+
+    // Header
+    const icon = $('modalIcon');
+    icon.textContent = asset.icon;
+    icon.style.background = asset.color;
+    $('modalTitle').textContent = asset.name;
+    $('modalSubtitle').textContent = asset.sub;
+
+    // Body
+    const body = $('modalBody');
+    let html = '';
+
+    // Tags
+    if (info.tags && info.tags.length) {
+      html += '<div class="modal-section"><div class="modal-pillrow">' +
+        info.tags.map(t => `<span class="modal-pill">${t}</span>`).join('') +
+        '</div></div>';
+    }
+
+    // Sections
+    info.sections.forEach(section => {
+      html += '<div class="modal-section">';
+      html += `<h3>${section.h}</h3>`;
+      if (section.p) {
+        section.p.forEach(para => { html += `<p>${para}</p>`; });
+      }
+      if (section.list) {
+        html += '<ul class="modal-list">' +
+          section.list.map(item => `<li>${item}</li>`).join('') +
+          '</ul>';
+      }
+      html += '</div>';
+    });
+
+    // Factsheets
+    html += '<div class="modal-section"><h3>Reference materials</h3>';
+    if (info.factsheets && info.factsheets.length) {
+      html += '<div class="modal-factsheets">';
+      html += '<div class="modal-factsheets-title">Factsheets &amp; product decks</div>';
+      info.factsheets.forEach(fs => {
+        const safe = encodeURI(fs.path);
+        html += `<a class="modal-factsheet-link" href="${safe}" target="_blank" rel="noopener">` +
+                `<span class="fs-name">${fs.name}</span><span class="fs-arrow">↗</span></a>`;
+      });
+      html += '</div>';
+    } else {
+      html += '<div class="modal-empty-fs">No reference materials are linked yet for this asset class. ' +
+              'Drop the relevant PDFs into the corresponding sub-folder under <code>Asset classes/</code> to enable them.</div>';
+    }
+    html += '</div>';
+
+    body.innerHTML = html;
+    $('infoModal').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeInfoModal() {
+    $('infoModal').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  // Modal close wiring
+  $('modalCloseBtn').addEventListener('click', closeInfoModal);
+  $('infoModal').addEventListener('click', (e) => {
+    if (e.target === $('infoModal')) closeInfoModal();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && $('infoModal').classList.contains('open')) closeInfoModal();
+  });
+
+  // ============ Render ============
+  function render() {
+    // Snapshot - name
+    const nameEl = $('snapName');
+    if (state.clientName.trim()) {
+      nameEl.textContent = state.clientName.trim();
+      nameEl.classList.remove('placeholder');
+    } else {
+      nameEl.textContent = '— enter a name above —';
+      nameEl.classList.add('placeholder');
+    }
+
+    // Snapshot - basics
+    $('snapCurrentAge').textContent = state.currentAge;
+    $('snapRetireAge').textContent = state.retireAge;
+    $('snapDependents').textContent = state.dependents;
+    $('snapInflation').textContent = state.inflation.toFixed(1) + '%';
+    $('snapAssets').textContent = fmt(state.assets);
+
+    // Horizon
+    const horizon = state.retireAge - state.currentAge;
+    const horizonEl = $('snapHorizon');
+    if (horizon < 1) {
+      horizonEl.textContent = 'Already at retirement age';
+    } else if (horizon === 1) {
+      horizonEl.textContent = '1 year to retirement';
+    } else {
+      horizonEl.textContent = horizon + ' years to retirement';
+    }
+
+    // Income / legacy — escalate today's-dollar targets to retirement year using inflation
+    const horizonYrs = Math.max(0, state.retireAge - state.currentAge);
+    const inflFactor = Math.pow(1 + state.inflation / 100, horizonYrs);
+
+    const incomeWrap = $('snapIncomeWrap');
+    if (state.incomeNeed) {
+      incomeWrap.style.display = 'block';
+      const future = state.incomeNeed * inflFactor;
+      $('snapIncome').textContent = fmt(future) + ' / year';
+      $('snapIncomeSub').textContent =
+        horizonYrs > 0
+          ? fmt(state.incomeNeed) + ' today, escalated ' + state.inflation.toFixed(1) + '% × ' + horizonYrs + ' yrs'
+          : '';
+    } else {
+      incomeWrap.style.display = 'none';
+    }
+    const legacyWrap = $('snapLegacyWrap');
+    if (state.legacy) {
+      legacyWrap.style.display = 'block';
+      const future = state.legacy * inflFactor;
+      $('snapLegacy').textContent = fmt(future);
+      $('snapLegacySub').textContent =
+        horizonYrs > 0
+          ? fmt(state.legacy) + ' today, escalated ' + state.inflation.toFixed(1) + '% × ' + horizonYrs + ' yrs'
+          : '';
+    } else {
+      legacyWrap.style.display = 'none';
+    }
+
+    // Validation banner (Step 1)
+    const banner = $('banner');
+    if (state.retireAge <= state.currentAge) {
+      banner.textContent = 'Retirement age must be greater than current age.';
+      banner.classList.add('show');
+    } else {
+      banner.classList.remove('show');
+    }
+
+    // ===== Step 2: allocation =====
+    const plan = computePlan();
+    $('assetsEcho').textContent = fmt(state.assets);
+
+    ASSETS.forEach(asset => {
+      const cfg = state.allocations[asset.id];
+      $('amount-' + asset.id).textContent = fmt(plan.amounts[asset.id]);
+      $('amountmeta-' + asset.id).textContent = cfg.pct.toFixed(1) + '% of portfolio';
+      $('pct-' + asset.id).textContent = cfg.pct.toFixed(1) + '%';
+      $('net-' + asset.id).textContent = plan.nets[asset.id].toFixed(2) + '%';
+      $('ret-' + asset.id).textContent = fmt(plan.returns[asset.id]) + ' / yr';
+      // Allocation bar segment width — scale segments to fit if total > 100%
+      const totalForBar = Math.max(plan.allocated, 100);
+      const segWidth = (cfg.pct / totalForBar) * 100;
+      const seg = $('seg-' + asset.id);
+      if (seg) seg.style.width = segWidth + '%';
+    });
+
+    // Cash card
+    $('amount-cash').textContent = fmt(plan.amounts.cash);
+    $('amountmeta-cash').textContent = plan.cashPct.toFixed(1) + '% of portfolio';
+    $('net-cash').textContent = plan.nets.cash.toFixed(2) + '%';
+    $('ret-cash').textContent = fmt(plan.returns.cash) + ' / yr';
+    const cashSegWidth = plan.overAllocated ? 0 : plan.cashPct;
+    $('seg-cash').style.width = cashSegWidth + '%';
+
+    // Overview stats
+    $('stat-allocated').textContent = plan.allocated.toFixed(1) + '%';
+    $('stat-cash').textContent = plan.cashPct.toFixed(1) + '%';
+    $('stat-blended').textContent = plan.blendedNet.toFixed(2) + '%';
+    $('stat-return').textContent = fmt(plan.totalReturn) + ' / yr';
+
+    // Mark allocated stat tile as warn if overallocated
+    const allocatedTile = $('stat-allocated').parentElement;
+    const allocatedVal = $('stat-allocated');
+    if (plan.overAllocated) {
+      allocatedTile.classList.add('warn');
+      allocatedVal.classList.remove('primary');
+      allocatedVal.classList.add('warn');
+    } else {
+      allocatedTile.classList.remove('warn');
+      allocatedVal.classList.remove('warn');
+      allocatedVal.classList.add('primary');
+    }
+
+    // Over-allocation banner & disable Continue
+    const overBanner = $('overBanner');
+    const continueStep3 = $('continueToStep3Btn');
+    if (plan.overAllocated) {
+      overBanner.textContent = 'Over-allocated by ' + (plan.allocated - 100).toFixed(1) + '%. Trim a bucket so the total is 100% or less.';
+      overBanner.classList.add('show');
+      if (continueStep3) continueStep3.disabled = true;
+    } else {
+      overBanner.classList.remove('show');
+      if (continueStep3) continueStep3.disabled = false;
+    }
+
+    // ===== Step 3: timeline projection =====
+    if (state.currentStep === 3) {
+      updateTimelineSummaries();
+      const timeline = computeTimeline();
+      renderProjectionChart(timeline);
+      renderMilestones(timeline);
+    }
+
+    // ===== Snapshot: plan section (visible from Step 2 onwards) =====
+    const snapPlan = $('snapPlan');
+    if (state.currentStep >= 2) {
+      snapPlan.style.display = 'block';
+      $('snapAllocated').textContent = plan.allocated.toFixed(1) + '%';
+      $('snapCashRes').textContent = plan.cashPct.toFixed(1) + '% · ' + fmt(plan.amounts.cash);
+      $('snapBlended').textContent = plan.blendedNet.toFixed(2) + '%';
+      $('snapAnnualReturn').textContent = fmt(plan.totalReturn) + ' / yr';
+
+      // Compare against income target if set
+      if (state.incomeNeed) {
+        const futureTarget = state.incomeNeed * inflFactor;
+        const gap = plan.totalReturn - futureTarget;
+        const pctOfTarget = futureTarget > 0 ? (plan.totalReturn / futureTarget) * 100 : 0;
+        const sign = gap >= 0 ? '+' : '−';
+        $('snapAnnualReturnSub').textContent =
+          sign + fmt(Math.abs(gap)) + ' vs target · ' + pctOfTarget.toFixed(0) + '%';
+      } else {
+        $('snapAnnualReturnSub').textContent = '';
+      }
+    } else {
+      snapPlan.style.display = 'none';
+    }
+  }
+
+  // ============ Step navigation ============
+  function goToStep(n) {
+    state.currentStep = n;
+    $('step1Panel').classList.toggle('hidden', n !== 1);
+    $('step2Panel').classList.toggle('hidden', n !== 2);
+    $('step3Panel').classList.toggle('hidden', n !== 3);
+
+    // Update stepper pills
+    [1, 2, 3].forEach(i => {
+      const pill = $('pill' + i);
+      pill.classList.remove('active', 'complete');
+      if (i < n) {
+        pill.classList.add('complete');
+        $('pill' + i + '-num').textContent = '✓';
+      } else if (i === n) {
+        pill.classList.add('active');
+        $('pill' + i + '-num').textContent = i;
+      } else {
+        $('pill' + i + '-num').textContent = i;
+      }
+    });
+
+    // Scroll to top of main content
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    render();
+  }
+
+  // ============ Wiring ============
+
+  // Client name
+  $('clientName').addEventListener('input', (e) => {
+    state.clientName = e.target.value;
+    render();
+  });
+
+  // Current age slider
+  const curSlider = $('currentAgeSlider');
+  curSlider.addEventListener('input', (e) => {
+    state.currentAge = +e.target.value;
+    $('currentAgeValue').textContent = state.currentAge;
+    setSliderFill(curSlider);
+    // ensure retireAge > currentAge
+    if (state.retireAge <= state.currentAge) {
+      state.retireAge = Math.min(90, state.currentAge + 1);
+      $('retireAgeSlider').value = state.retireAge;
+      $('retireAgeValue').textContent = state.retireAge;
+      setSliderFill($('retireAgeSlider'));
+    }
+    render();
+  });
+
+  // Retirement age slider
+  const retSlider = $('retireAgeSlider');
+  retSlider.addEventListener('input', (e) => {
+    state.retireAge = +e.target.value;
+    $('retireAgeValue').textContent = state.retireAge;
+    setSliderFill(retSlider);
+    render();
+  });
+
+  // Assets - keep input + slider in sync
+  const assetsInput = $('assets');
+  const assetsSlider = $('assetsSlider');
+  assetsInput.addEventListener('input', (e) => {
+    const n = parseNum(e.target.value);
+    state.assets = n;
+    // clamp slider
+    const clamped = Math.min(+assetsSlider.max, Math.max(+assetsSlider.min, n));
+    assetsSlider.value = clamped;
+    setSliderFill(assetsSlider);
+    render();
+  });
+  assetsInput.addEventListener('blur', (e) => {
+    e.target.value = fmtPlain(state.assets);
+  });
+  assetsSlider.addEventListener('input', (e) => {
+    state.assets = +e.target.value;
+    assetsInput.value = fmtPlain(state.assets);
+    setSliderFill(assetsSlider);
+    render();
+  });
+
+  // Income / legacy formatting on blur
+  const incomeInput = $('incomeNeed');
+  incomeInput.addEventListener('input', (e) => {
+    state.incomeNeed = parseNum(e.target.value) || null;
+    render();
+  });
+  incomeInput.addEventListener('blur', (e) => {
+    if (state.incomeNeed) e.target.value = fmtPlain(state.incomeNeed);
+  });
+
+  const legacyInput = $('legacy');
+  legacyInput.addEventListener('input', (e) => {
+    state.legacy = parseNum(e.target.value) || null;
+    render();
+  });
+  legacyInput.addEventListener('blur', (e) => {
+    if (state.legacy) e.target.value = fmtPlain(state.legacy);
+  });
+
+  // Inflation slider
+  const inflSlider = $('inflationSlider');
+  inflSlider.addEventListener('input', (e) => {
+    state.inflation = +e.target.value;
+    $('inflationValue').textContent = state.inflation.toFixed(1) + '%';
+    setSliderFill(inflSlider);
+    render();
+  });
+
+  // Dependents
+  const depMinus = $('depMinus');
+  const depPlus = $('depPlus');
+  const depValue = $('depValue');
+  function updateDeps() {
+    depValue.textContent = state.dependents;
+    depMinus.disabled = state.dependents <= 0;
+    depPlus.disabled = state.dependents >= 10;
+    render();
+  }
+  depMinus.addEventListener('click', () => {
+    if (state.dependents > 0) { state.dependents--; updateDeps(); }
+  });
+  depPlus.addEventListener('click', () => {
+    if (state.dependents < 10) { state.dependents++; updateDeps(); }
+  });
+
+  // Toast helper (used when Step 3 isn't built yet)
+  const toast = $('toast');
+  let toastTimer = null;
+  function showToast(msg) {
+    if (msg) toast.textContent = msg;
+    toast.classList.add('show');
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove('show'), 2400);
+  }
+
+  // Step navigation buttons
+  $('continueBtn').addEventListener('click', () => {
+    if (state.retireAge <= state.currentAge) return; // banner already shown
+    goToStep(2);
+  });
+  $('backToStep1Btn').addEventListener('click', () => goToStep(1));
+  $('continueToStep3Btn').addEventListener('click', () => {
+    // Don't allow if over-allocated
+    const plan = computePlan();
+    if (plan.overAllocated) return;
+    goToStep(3);
+  });
+  $('backToStep2Btn').addEventListener('click', () => goToStep(2));
+  $('printBtn').addEventListener('click', printSummary);
+  $('printReportBtn').addEventListener('click', printSummary);
+
+  // Stepper pill clicks (allow jumping back to a previously visited step)
+  [1, 2, 3].forEach(i => {
+    const pill = $('pill' + i);
+    pill.addEventListener('click', () => {
+      if (i === 2 && state.retireAge <= state.currentAge) return;
+      if (i === 3) {
+        const plan = computePlan();
+        if (plan.overAllocated) return;
+      }
+      goToStep(i);
+    });
+  });
+
+  // Chart end-age toggle
+  document.querySelectorAll('.chart-toggle').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.chart-toggle').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      state.projectionEndAge = +btn.dataset.end;
+      // Update timeline slider max bounds
+      TIMELINE_BUCKETS.forEach(id => {
+        const slider = $('payout-' + id);
+        if (slider) slider.max = state.projectionEndAge;
+      });
+      render();
+    });
+  });
+
+  // Reset
+  $('resetBtn').addEventListener('click', () => {
+    // Step 1
+    state.clientName = '';
+    state.currentAge = 50;
+    state.retireAge = 65;
+    state.assets = 1000000;
+    state.incomeNeed = null;
+    state.legacy = null;
+    state.inflation = 3.0;
+    state.dependents = 0;
+
+    $('clientName').value = '';
+    curSlider.value = 50; $('currentAgeValue').textContent = 50;
+    retSlider.value = 65; $('retireAgeValue').textContent = 65;
+    assetsInput.value = '1,000,000';
+    assetsSlider.value = 1000000;
+    incomeInput.value = '';
+    legacyInput.value = '';
+    inflSlider.value = 3;
+    $('inflationValue').textContent = '3.0%';
+
+    // Step 2 — reset allocations to defaults
+    ASSETS.forEach(asset => {
+      state.allocations[asset.id].pct = asset.defaultPct;
+      state.allocations[asset.id].gross = asset.defaultGross;
+      state.allocations[asset.id].fees = asset.defaultFees;
+      const slider = $('alloc-' + asset.id);
+      if (slider) { slider.value = asset.defaultPct; setSliderFill(slider); }
+      const grossEl = $('gross-' + asset.id); if (grossEl) grossEl.value = asset.defaultGross;
+      const feesEl = $('fees-' + asset.id); if (feesEl) feesEl.value = asset.defaultFees;
+    });
+    state.allocations.cash.gross = 3.0;
+    const cashGrossEl = $('gross-cash'); if (cashGrossEl) cashGrossEl.value = 3.0;
+
+    // Step 3 — reset timeline + projection horizon
+    Object.keys(state.timeline).forEach(id => {
+      state.timeline[id].payoutStartAge = null;  // null → use defaults
+    });
+    state.projectionEndAge = 90;
+    document.querySelectorAll('.chart-toggle').forEach(b => b.classList.toggle('active', +b.dataset.end === 90));
+    renderTimelineCards();
+
+    updateDeps();
+    [curSlider, retSlider, assetsSlider, inflSlider].forEach(setSliderFill);
+    goToStep(1);
+  });
+
+  // ============ Init ============
+  buildAssetCards();
+  renderTimelineCards();
+  [curSlider, retSlider, assetsSlider, inflSlider].forEach(setSliderFill);
+  updateDeps();
+  render();
+</script>
+
+</body>
+</html>
